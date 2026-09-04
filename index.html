@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  
   <style>
     :root {
       --bg: #000000;
@@ -15,6 +16,7 @@
       --muted: #555555;
       --dim: #262626;
       --accent: #ffffff;
+      --accent-green: #38bdf8;
     }
 
     * {
@@ -30,7 +32,7 @@
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      padding: 48px 20px;
+      padding: 36px 20px;
       -webkit-font-smoothing: antialiased;
     }
 
@@ -39,15 +41,23 @@
       max-width: 660px;
       display: flex;
       flex-direction: column;
-      gap: 28px;
+      gap: 24px;
     }
 
     header {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
+      gap: 14px;
       border-bottom: 1px solid var(--panel-border);
       padding-bottom: 16px;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .brand {
@@ -55,6 +65,48 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--muted);
+    }
+
+    .account-meta {
+      font-size: 0.72rem;
+      color: var(--dim);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sync-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--muted);
+    }
+
+    .sync-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--muted);
+      display: inline-block;
+      transition: background 0.2s ease;
+    }
+
+    .sync-dot.synced {
+      background: #22c55e;
+    }
+
+    .sync-dot.saving {
+      background: #eab308;
+    }
+
+    .uid-tag {
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 1px dotted var(--dim);
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .nav-tabs {
@@ -94,7 +146,6 @@
       display: flex;
     }
 
-    /* Minimal Input Styles */
     .input-row {
       display: flex;
       border-bottom: 1px solid var(--panel-border);
@@ -115,7 +166,7 @@
       color: var(--dim);
     }
 
-    /* List & Items */
+    /* Items and Lists */
     .item-list {
       list-style: none;
       display: flex;
@@ -190,7 +241,6 @@
       color: var(--text);
     }
 
-    /* Calendar */
     .cal-controls {
       display: flex;
       justify-content: space-between;
@@ -284,10 +334,9 @@
       color: var(--muted);
     }
 
-    /* Notes Area */
     .note-sheet {
       width: 100%;
-      height: 480px;
+      height: 440px;
       background: transparent;
       border: 1px solid var(--panel-border);
       outline: none;
@@ -309,18 +358,39 @@
       font-size: 0.75rem;
       color: var(--dim);
     }
+
+    .notification-banner {
+      display: none;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      border: 1px solid var(--panel-border);
+      padding: 8px 12px;
+      margin-bottom: 4px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <div class="brand">sys // workspace</div>
+      <div class="header-top">
+        <div class="brand">sys // workspace</div>
+        <div class="account-meta">
+          <span class="sync-pill">
+            <span id="sync-indicator" class="sync-dot"></span>
+            <span id="sync-status">connecting</span>
+          </span>
+          <span>|</span>
+          <span id="account-id-label" class="uid-tag" title="Click to copy full user ID">account: connecting...</span>
+        </div>
+      </div>
       <nav class="nav-tabs">
         <button class="tab-btn active" onclick="navigate('tasks')">tasks</button>
         <button class="tab-btn" onclick="navigate('calendar')">calendar</button>
         <button class="tab-btn" onclick="navigate('notes')">notes</button>
       </nav>
     </header>
+
+    <div id="status-banner" class="notification-banner"></div>
 
     <!-- 1. Tasks Panel -->
     <main id="tasks" class="view-panel active">
@@ -358,8 +428,161 @@
     </section>
   </div>
 
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    /* Global in-memory workspace state */
+    window.tasks = [];
+    window.calendarEvents = {};
+    window.notesContent = "";
+
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'oled-workspace';
+    let db = null;
+    let auth = null;
+    let userDocRef = null;
+    let authUserId = null;
+    let debounceSaveTimer = null;
+    let isRemoteUpdate = false;
+
+    const syncIndicator = document.getElementById('sync-indicator');
+    const syncStatus = document.getElementById('sync-status');
+    const accountIdLabel = document.getElementById('account-id-label');
+    const noteText = document.getElementById('note-text');
+    const noteCount = document.getElementById('note-count');
+    const noteState = document.getElementById('note-state');
+
+    function updateSyncBadge(state, label) {
+      syncStatus.innerText = label;
+      syncIndicator.className = 'sync-dot ' + (state === 'saved' ? 'synced' : (state === 'saving' ? 'saving' : ''));
+    }
+
+    async function setupStorage() {
+      if (typeof __firebase_config === 'undefined') {
+        syncStatus.innerText = 'offline session';
+        accountIdLabel.innerText = 'guest session';
+        return;
+      }
+
+      try {
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+        // Authenticate with custom token if provided, otherwise anonymous
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        const user = auth.currentUser;
+        if (!user) {
+          syncStatus.innerText = 'auth failed';
+          return;
+        }
+
+        authUserId = user.uid;
+        accountIdLabel.innerText = `id: ${authUserId}`;
+        accountIdLabel.title = `Full Account ID: ${authUserId} (click to copy)`;
+        accountIdLabel.onclick = () => {
+          const temp = document.createElement('input');
+          temp.value = authUserId;
+          document.body.appendChild(temp);
+          temp.select();
+          document.execCommand('copy');
+          document.body.removeChild(temp);
+          syncStatus.innerText = 'copied id!';
+          setTimeout(() => { syncStatus.innerText = 'synced'; }, 1500);
+        };
+
+        // Strict Path: /artifacts/{appId}/users/{userId}/{collectionName}/{documentId}
+        userDocRef = doc(db, 'artifacts', appId, 'users', authUserId, 'workspace', 'state');
+
+        // Realtime sync listener with mandatory error callback
+        onSnapshot(userDocRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.data();
+            isRemoteUpdate = true;
+            window.tasks = Array.isArray(data.tasks) ? data.tasks : [];
+            window.calendarEvents = typeof data.calendarEvents === 'object' && data.calendarEvents !== null ? data.calendarEvents : {};
+            window.notesContent = typeof data.notesContent === 'string' ? data.notesContent : "";
+            
+            if (document.activeElement !== noteText) {
+              noteText.value = window.notesContent;
+              updateNoteWordCount();
+            }
+
+            window.renderTasks();
+            window.renderCalendar();
+            isRemoteUpdate = false;
+            updateSyncBadge('saved', 'synced');
+          } else {
+            // First time initialization
+            triggerPersist(true);
+            updateSyncBadge('saved', 'synced');
+          }
+        }, (error) => {
+          console.error("Snapshot error:", error);
+          updateSyncBadge('error', 'sync error');
+        });
+
+      } catch (err) {
+        console.error("Firebase auth/init error:", err);
+        updateSyncBadge('error', 'offline mode');
+      }
+    }
+
+    window.triggerPersist = function(immediate = false) {
+      if (!userDocRef || isRemoteUpdate) return;
+
+      updateSyncBadge('saving', 'saving...');
+      clearTimeout(debounceSaveTimer);
+
+      const doSave = async () => {
+        try {
+          await setDoc(userDocRef, {
+            tasks: window.tasks,
+            calendarEvents: window.calendarEvents,
+            notesContent: window.notesContent,
+            updatedAt: new Date().toISOString()
+          });
+          updateSyncBadge('saved', 'synced');
+        } catch (err) {
+          console.error("Error saving document:", err);
+          updateSyncBadge('error', 'save error');
+        }
+      };
+
+      if (immediate) {
+        doSave();
+      } else {
+        debounceSaveTimer = setTimeout(doSave, 500);
+      }
+    };
+
+    function updateNoteWordCount() {
+      const words = noteText.value.trim() ? noteText.value.trim().split(/\s+/).length : 0;
+      noteCount.innerText = `${words} word${words === 1 ? '' : 's'}`;
+    }
+
+    // Notes auto-sync listener
+    noteText.addEventListener('input', () => {
+      window.notesContent = noteText.value;
+      noteState.innerText = 'typing...';
+      updateNoteWordCount();
+      window.triggerPersist(false);
+      setTimeout(() => {
+        noteState.innerText = 'in-sync';
+      }, 500);
+    });
+
+    setupStorage();
+  </script>
+
   <script>
-    // Tab State
     function navigate(viewName) {
       document.querySelectorAll('.tab-btn').forEach(b => {
         b.classList.toggle('active', b.innerText === viewName);
@@ -370,14 +593,13 @@
       if (viewName === 'calendar') renderCalendar();
     }
 
-    // Task Engine (In-memory single session default)
-    let tasks = [];
+    // Tasks Management
     const taskInput = document.getElementById('task-input');
     const taskList = document.getElementById('task-list');
 
-    function renderTasks() {
+    window.renderTasks = function() {
       taskList.innerHTML = '';
-      tasks.forEach((t, i) => {
+      (window.tasks || []).forEach((t, i) => {
         const li = document.createElement('li');
         li.className = 'item-row';
         li.innerHTML = `
@@ -389,30 +611,33 @@
         `;
         taskList.appendChild(li);
       });
-    }
+    };
 
-    function toggleTask(index) {
-      tasks[index].done = !tasks[index].done;
+    window.toggleTask = function(index) {
+      if (!window.tasks[index]) return;
+      window.tasks[index].done = !window.tasks[index].done;
       renderTasks();
-    }
+      window.triggerPersist();
+    };
 
-    function removeTask(index) {
-      tasks.splice(index, 1);
+    window.removeTask = function(index) {
+      window.tasks.splice(index, 1);
       renderTasks();
-    }
+      window.triggerPersist();
+    };
 
     taskInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && taskInput.value.trim()) {
-        tasks.unshift({ text: taskInput.value.trim(), done: false });
+        window.tasks.unshift({ text: taskInput.value.trim(), done: false });
         taskInput.value = '';
         renderTasks();
+        window.triggerPersist();
       }
     });
 
-    // Calendar Engine
+    // Calendar Management
     let activeCalDate = new Date();
     let currentSelectedDateKey = dateToKey(new Date());
-    let calendarEvents = {};
 
     const calMatrix = document.getElementById('cal-matrix');
     const calMonthName = document.getElementById('cal-month-name');
@@ -432,7 +657,7 @@
       renderCalendar();
     }
 
-    function renderCalendar() {
+    window.renderCalendar = function() {
       calMatrix.innerHTML = '';
       const year = activeCalDate.getFullYear();
       const month = activeCalDate.getMonth();
@@ -459,6 +684,8 @@
         calMatrix.appendChild(emptyCell);
       }
 
+      const eventsMap = window.calendarEvents || {};
+
       for (let day = 1; day <= daysCountInMonth; day++) {
         const cell = document.createElement('div');
         cell.className = 'matrix-cell';
@@ -469,7 +696,7 @@
 
         cell.innerText = day;
 
-        if (calendarEvents[dayKey] && calendarEvents[dayKey].length > 0) {
+        if (eventsMap[dayKey] && eventsMap[dayKey].length > 0) {
           const marker = document.createElement('div');
           marker.className = 'event-indicator';
           cell.appendChild(marker);
@@ -484,12 +711,13 @@
         calMatrix.appendChild(cell);
       }
       renderSchedule();
-    }
+    };
 
     function renderSchedule() {
       calScheduleDate.innerText = currentSelectedDateKey ? `entries :: ${currentSelectedDateKey}` : 'select a day';
       eventList.innerHTML = '';
-      const entries = calendarEvents[currentSelectedDateKey] || [];
+      const eventsMap = window.calendarEvents || {};
+      const entries = eventsMap[currentSelectedDateKey] || [];
       entries.forEach((entry, idx) => {
         const li = document.createElement('li');
         li.className = 'item-row';
@@ -501,47 +729,36 @@
       });
     }
 
-    function removeEvent(key, idx) {
-      calendarEvents[key].splice(idx, 1);
-      if (calendarEvents[key].length === 0) delete calendarEvents[key];
-      renderCalendar();
-    }
+    window.removeEvent = function(key, idx) {
+      if (window.calendarEvents && window.calendarEvents[key]) {
+        window.calendarEvents[key].splice(idx, 1);
+        if (window.calendarEvents[key].length === 0) delete window.calendarEvents[key];
+        renderCalendar();
+        window.triggerPersist();
+      }
+    };
 
     eventInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && eventInput.value.trim()) {
         if (!currentSelectedDateKey) return;
-        if (!calendarEvents[currentSelectedDateKey]) calendarEvents[currentSelectedDateKey] = [];
-        calendarEvents[currentSelectedDateKey].push(eventInput.value.trim());
+        if (!window.calendarEvents) window.calendarEvents = {};
+        if (!window.calendarEvents[currentSelectedDateKey]) {
+          window.calendarEvents[currentSelectedDateKey] = [];
+        }
+        window.calendarEvents[currentSelectedDateKey].push(eventInput.value.trim());
         eventInput.value = '';
         renderCalendar();
+        window.triggerPersist();
       }
     });
 
-    // Notes Scratchpad Engine
-    const noteText = document.getElementById('note-text');
-    const noteCount = document.getElementById('note-count');
-    const noteState = document.getElementById('note-state');
-    let debounceTimer = null;
-
-    noteText.addEventListener('input', () => {
-      noteState.innerText = 'typing...';
-      const words = noteText.value.trim() ? noteText.value.trim().split(/\s+/).length : 0;
-      noteCount.innerText = `${words} word${words === 1 ? '' : 's'}`;
-
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        noteState.innerText = 'in-sync';
-      }, 400);
-    });
-
-    // Utility
     function escapeMarkup(str) {
       const el = document.createElement('div');
       el.innerText = str;
       return el.innerHTML;
     }
 
-    // Initial render
+    // Initial first-paint render
     renderTasks();
   </script>
 </body>
