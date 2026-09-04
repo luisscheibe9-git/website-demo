@@ -93,6 +93,7 @@
 
     .sync-dot.synced { background: #22c55e; }
     .sync-dot.saving { background: #eab308; }
+    .sync-dot.error { background: #ef4444; }
 
     .uid-tag {
       color: var(--text);
@@ -828,7 +829,6 @@
       to { opacity: 1; }
     }
 
-    /* Responsive */
     @media (max-width: 640px) {
       .cal-week-grid {
         grid-template-columns: 1fr;
@@ -861,9 +861,9 @@
         </div>
       </div>
       <nav class="nav-tabs">
-        <button class="tab-btn active" onclick="navigate('tasks')">tasks</button>
-        <button class="tab-btn" onclick="navigate('calendar')">calendar</button>
-        <button class="tab-btn" onclick="navigate('notes')">notes</button>
+        <button class="tab-btn active" id="nav-btn-tasks">tasks</button>
+        <button class="tab-btn" id="nav-btn-calendar">calendar</button>
+        <button class="tab-btn" id="nav-btn-notes">notes</button>
       </nav>
     </header>
 
@@ -872,26 +872,26 @@
       <div class="focus-cluster">
         <span class="focus-label">FOCUS</span>
         <span class="timer-display" id="timer-display">25:00</span>
-        <button class="timer-btn" id="timer-toggle-btn" onclick="toggleFocusTimer()">start</button>
-        <button class="timer-btn" onclick="resetFocusTimer()">reset</button>
+        <button class="timer-btn" id="timer-toggle-btn">start</button>
+        <button class="timer-btn" id="timer-reset-btn">reset</button>
         <div style="display: flex; gap: 4px; align-items: center;">
-          <button class="timer-mode-btn active" id="mode-25" onclick="setTimerDuration(25)">25m</button>
-          <button class="timer-mode-btn" id="mode-5" onclick="setTimerDuration(5)">5m</button>
-          <button class="timer-mode-btn" id="mode-15" onclick="setTimerDuration(15)">15m</button>
+          <button class="timer-mode-btn active" id="mode-25">25m</button>
+          <button class="timer-mode-btn" id="mode-5">5m</button>
+          <button class="timer-mode-btn" id="mode-15">15m</button>
           <div class="custom-timer-wrap">
-            <input type="number" id="custom-timer-input" class="custom-timer-input" min="1" max="480" placeholder="mins" autocomplete="off" onkeydown="if(event.key==='Enter')applyCustomTimer()" onblur="if(this.value)applyCustomTimer()">
-            <button class="timer-btn" style="padding: 2px 6px; font-size: 0.72rem;" onclick="applyCustomTimer()">set</button>
+            <input type="number" id="custom-timer-input" class="custom-timer-input" min="1" max="480" placeholder="mins" autocomplete="off">
+            <button class="timer-btn" id="custom-timer-btn" style="padding: 2px 6px; font-size: 0.72rem;">set</button>
           </div>
         </div>
       </div>
       <div class="focus-target-task" id="focus-task-info" title="Click ⏱ on any task to bind focus timer">
         <span>working on:</span>
         <span class="active-task-name" id="focus-task-name">none</span>
-        <button class="action-btn" id="focus-clear-btn" style="display: none; font-size: 0.75rem;" onclick="clearFocusTask()">×</button>
+        <button class="action-btn" id="focus-clear-btn" style="display: none; font-size: 0.75rem;">×</button>
       </div>
     </div>
 
-    <!-- Notification / Action banner -->
+    <!-- Notification banner -->
     <div class="toast-banner" id="toast-banner"></div>
 
     <!-- 1. TASKS PANEL -->
@@ -917,7 +917,7 @@
             <option value="monthly">monthly</option>
           </select>
 
-          <button class="btn-add" onclick="addTaskFromInput()">+ add</button>
+          <button class="btn-add" id="task-add-btn">+ add</button>
         </div>
       </div>
 
@@ -936,16 +936,16 @@
     <section id="calendar" class="view-panel">
       <div class="cal-header-bar">
         <div class="cal-nav-group">
-          <button class="cal-nav-btn" onclick="calNavigate(-1)">&lt;</button>
+          <button class="cal-nav-btn" id="cal-prev-btn">&lt;</button>
           <span id="cal-date-title" style="font-weight: 500;"></span>
-          <button class="cal-nav-btn" onclick="calNavigate(1)">&gt;</button>
-          <button class="cal-nav-btn" onclick="calGoToday()" style="font-size: 0.75rem;">today</button>
+          <button class="cal-nav-btn" id="cal-next-btn">&gt;</button>
+          <button class="cal-nav-btn" id="cal-today-btn" style="font-size: 0.75rem;">today</button>
         </div>
         
         <div class="cal-view-modes">
-          <button class="mode-btn active" id="mode-btn-month" onclick="switchCalMode('month')">month</button>
-          <button class="mode-btn" id="mode-btn-week" onclick="switchCalMode('week')">week</button>
-          <button class="mode-btn" id="mode-btn-day" onclick="switchCalMode('day')">day / hour</button>
+          <button class="mode-btn active" id="mode-btn-month">month</button>
+          <button class="mode-btn" id="mode-btn-week">week</button>
+          <button class="mode-btn" id="mode-btn-day">day / hour</button>
         </div>
       </div>
 
@@ -969,7 +969,7 @@
               <option value="weekly">weekly</option>
               <option value="monthly">monthly</option>
             </select>
-            <button class="btn-add" onclick="addTaskFromCalendar()">+ schedule</button>
+            <button class="btn-add" id="cal-schedule-btn">+ schedule</button>
           </div>
         </div>
 
@@ -981,19 +981,20 @@
     <section id="notes" class="view-panel">
       <div class="notes-controls">
         <div style="font-size: 0.82rem;">sticky notes (<span id="notes-count-label">0</span>)</div>
-        <button class="btn-add" onclick="createStickyNote()">+ new sticky note</button>
+        <button class="btn-add" id="note-create-btn">+ new sticky note</button>
       </div>
 
       <div class="notes-grid" id="notes-grid"></div>
     </section>
   </div>
 
-  <!-- Cloud Sync & State Initialization -->
+  <!-- Unified Self-Contained Application & Storage Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+    // Application Master State
     window.workspace = {
       todoLists: { "main": [] },
       currentListId: "main",
@@ -1001,60 +1002,123 @@
         {
           id: 'note-welcome',
           title: 'welcome',
-          body: 'persistent ink notes. click ⏱ on any task to start your focus session.',
+          body: 'tasks, dates, and sticky notes automatically save directly to your account.',
           updatedAt: new Date().toLocaleDateString()
         }
       ]
     };
 
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'oled-workspace';
+    // Firebase Architecture
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     let db = null;
     let auth = null;
     let userDocRef = null;
-    let authUserId = null;
+    let currentUser = null;
+    let isRemoteSyncing = false;
     let debounceSaveTimer = null;
-    let isRemoteUpdate = false;
+    let hasQueuedSave = false;
 
+    // DOM Elements
     const syncIndicator = document.getElementById('sync-indicator');
     const syncStatus = document.getElementById('sync-status');
     const accountIdLabel = document.getElementById('account-id-label');
+    const toastBanner = document.getElementById('toast-banner');
 
     function updateSyncBadge(state, label) {
       syncStatus.innerText = label;
-      syncIndicator.className = 'sync-dot ' + (state === 'saved' ? 'synced' : (state === 'saving' ? 'saving' : ''));
+      syncIndicator.className = 'sync-dot ' + (state === 'saved' ? 'synced' : (state === 'saving' ? 'saving' : (state === 'error' ? 'error' : '')));
     }
 
+    let toastTimeout = null;
+    window.showToast = function(msg) {
+      toastBanner.innerText = msg;
+      toastBanner.style.display = 'block';
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toastBanner.style.display = 'none';
+      }, 3500);
+    };
+
+    // Safe sanitized persistence
+    window.persistWorkspace = function(immediate = false) {
+      if (!currentUser || !userDocRef) {
+        hasQueuedSave = true;
+        return;
+      }
+      if (isRemoteSyncing) return;
+
+      updateSyncBadge('saving', 'saving...');
+      clearTimeout(debounceSaveTimer);
+
+      const doSave = async () => {
+        try {
+          // JSON stringify & parse strips any 'undefined' properties that Firestore rejects
+          const cleanPayload = JSON.parse(JSON.stringify({
+            todoLists: window.workspace.todoLists || { "main": [] },
+            currentListId: window.workspace.currentListId || "main",
+            stickyNotes: window.workspace.stickyNotes || [],
+            updatedAt: new Date().toISOString()
+          }));
+
+          await setDoc(userDocRef, cleanPayload);
+          updateSyncBadge('saved', 'synced');
+        } catch (err) {
+          console.error("Firestore setDoc save error:", err);
+          updateSyncBadge('error', 'save error');
+        }
+      };
+
+      if (immediate) {
+        doSave();
+      } else {
+        debounceSaveTimer = setTimeout(doSave, 350);
+      }
+    };
+
+    // Flush saves on page reload or tab switch
+    window.addEventListener('beforeunload', () => {
+      window.persistWorkspace(true);
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        window.persistWorkspace(true);
+      }
+    });
+
+    // Cloud Storage Initialization
     async function initStorage() {
       if (typeof __firebase_config === 'undefined') {
-        syncStatus.innerText = 'offline session';
-        accountIdLabel.innerText = 'guest session';
+        updateSyncBadge('error', 'offline');
+        accountIdLabel.innerText = 'offline-session';
         return;
       }
 
       try {
-        const firebaseConfig = JSON.parse(__firebase_config);
+        updateSyncBadge('saving', 'connecting...');
+        const firebaseConfig = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
         const app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
         auth = getAuth(app);
+        db = getFirestore(app);
 
+        // RULE 3: Authenticate FIRST and await it
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
           await signInWithCustomToken(auth, __initial_auth_token);
         } else {
           await signInAnonymously(auth);
         }
 
-        const user = auth.currentUser;
-        if (!user) {
-          syncStatus.innerText = 'auth failed';
+        currentUser = auth.currentUser;
+        if (!currentUser) {
+          updateSyncBadge('error', 'auth failed');
           return;
         }
 
-        authUserId = user.uid;
-        accountIdLabel.innerText = `id: ${authUserId}`;
-        accountIdLabel.title = `Account ID: ${authUserId} (click to copy)`;
+        const userId = currentUser.uid;
+        accountIdLabel.innerText = `id: ${userId}`;
+        accountIdLabel.title = `Full Account ID: ${userId} (click to copy)`;
         accountIdLabel.onclick = () => {
           const temp = document.createElement('input');
-          temp.value = authUserId;
+          temp.value = userId;
           document.body.appendChild(temp);
           temp.select();
           document.execCommand('copy');
@@ -1062,20 +1126,24 @@
           window.showToast('Account ID copied to clipboard');
         };
 
-        userDocRef = doc(db, 'artifacts', appId, 'users', authUserId, 'workspace', 'state');
+        // RULE 1: Strict Paths - private data under /artifacts/{appId}/users/{userId}/{collectionName}/{docId}
+        userDocRef = doc(db, 'artifacts', appId, 'users', userId, 'data', 'workspace');
 
+        // Realtime Firestore Listener
         onSnapshot(userDocRef, (snapshot) => {
           if (snapshot.exists()) {
             const data = snapshot.data();
-            isRemoteUpdate = true;
+            isRemoteSyncing = true;
 
-            if (data.todoLists && typeof data.todoLists === 'object') {
+            if (data.todoLists && typeof data.todoLists === 'object' && Object.keys(data.todoLists).length > 0) {
               window.workspace.todoLists = data.todoLists;
             } else if (Array.isArray(data.tasks)) {
               window.workspace.todoLists = { "main": data.tasks };
             }
 
-            if (!window.workspace.todoLists[window.workspace.currentListId]) {
+            if (data.currentListId && window.workspace.todoLists[data.currentListId]) {
+              window.workspace.currentListId = data.currentListId;
+            } else if (!window.workspace.todoLists[window.workspace.currentListId]) {
               window.workspace.currentListId = Object.keys(window.workspace.todoLists)[0] || "main";
             }
 
@@ -1083,58 +1151,37 @@
               window.workspace.stickyNotes = data.stickyNotes;
             }
 
-            window.renderSublists();
-            window.renderTasks();
-            window.renderCalendarView();
-            window.renderStickyNotes();
+            renderSublists();
+            renderTasks();
+            renderCalendarView();
+            renderStickyNotes();
 
-            isRemoteUpdate = false;
+            isRemoteSyncing = false;
             updateSyncBadge('saved', 'synced');
           } else {
+            // First time setup for this account: commit current state immediately
             window.persistWorkspace(true);
-            updateSyncBadge('saved', 'synced');
           }
-        }, (err) => {
-          console.error("Firestore snapshot error:", err);
+        }, (error) => {
+          console.error("Firestore onSnapshot error:", error);
           updateSyncBadge('error', 'sync error');
         });
 
+        if (hasQueuedSave) {
+          hasQueuedSave = false;
+          window.persistWorkspace(true);
+        }
+
       } catch (err) {
-        console.error("Storage error:", err);
-        updateSyncBadge('error', 'offline mode');
+        console.error("Storage Initialization Error:", err);
+        updateSyncBadge('error', 'connection error');
       }
     }
 
-    window.persistWorkspace = function(immediate = false) {
-      if (!userDocRef || isRemoteUpdate) return;
-      updateSyncBadge('saving', 'saving...');
-      clearTimeout(debounceSaveTimer);
-
-      const doSave = async () => {
-        try {
-          await setDoc(userDocRef, {
-            todoLists: window.workspace.todoLists,
-            stickyNotes: window.workspace.stickyNotes,
-            updatedAt: new Date().toISOString()
-          });
-          updateSyncBadge('saved', 'synced');
-        } catch (err) {
-          console.error("Save error:", err);
-          updateSyncBadge('error', 'save error');
-        }
-      };
-
-      if (immediate) doSave();
-      else debounceSaveTimer = setTimeout(doSave, 400);
-    };
-
-    initStorage();
-  </script>
-
-  <!-- Application Logic -->
-  <script>
-    // Tab Switching
-    function navigate(tabName) {
+    // ==========================================
+    // UI NAVIGATION & FOCUS TIMER
+    // ==========================================
+    window.navigate = function(tabName) {
       document.querySelectorAll('.tab-btn').forEach(b => {
         b.classList.toggle('active', b.innerText === tabName);
       });
@@ -1143,34 +1190,25 @@
       });
       if (tabName === 'calendar') renderCalendarView();
       if (tabName === 'notes') renderStickyNotes();
-    }
-
-    // Discreet Toast System
-    let toastTimeout = null;
-    window.showToast = function(msg) {
-      const banner = document.getElementById('toast-banner');
-      banner.innerText = msg;
-      banner.style.display = 'block';
-      clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
-        banner.style.display = 'none';
-      }, 3500);
     };
 
-    // ==========================================
-    // FOCUS / POMODORO TIMER ENGINE
-    // ==========================================
+    document.getElementById('nav-btn-tasks').onclick = () => window.navigate('tasks');
+    document.getElementById('nav-btn-calendar').onclick = () => window.navigate('calendar');
+    document.getElementById('nav-btn-notes').onclick = () => window.navigate('notes');
+
     let timerTotalSeconds = 25 * 60;
     let timerRemainingSeconds = 25 * 60;
     let timerInterval = null;
     let isTimerRunning = false;
-    let activeFocusTask = null; // { id, text, listId }
+    let activeFocusTask = null;
 
     const timerDisplay = document.getElementById('timer-display');
     const timerToggleBtn = document.getElementById('timer-toggle-btn');
+    const timerResetBtn = document.getElementById('timer-reset-btn');
     const focusTaskName = document.getElementById('focus-task-name');
     const focusClearBtn = document.getElementById('focus-clear-btn');
     const customTimerInput = document.getElementById('custom-timer-input');
+    const customTimerBtn = document.getElementById('custom-timer-btn');
 
     function updateTimerDisplay() {
       const mins = Math.floor(timerRemainingSeconds / 60);
@@ -1180,36 +1218,28 @@
 
     function toggleFocusTimer() {
       if (isTimerRunning) {
-        pauseFocusTimer();
+        isTimerRunning = false;
+        clearInterval(timerInterval);
+        timerToggleBtn.innerText = 'resume';
       } else {
-        startFocusTimer();
+        if (timerRemainingSeconds <= 0) return;
+        isTimerRunning = true;
+        timerToggleBtn.innerText = 'pause';
+        
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+          timerRemainingSeconds--;
+          updateTimerDisplay();
+
+          if (timerRemainingSeconds <= 0) {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerToggleBtn.innerText = 'start';
+            playChime();
+            onFocusSessionComplete();
+          }
+        }, 1000);
       }
-    }
-
-    function startFocusTimer() {
-      if (timerRemainingSeconds <= 0) return;
-      isTimerRunning = true;
-      timerToggleBtn.innerText = 'pause';
-      
-      clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        timerRemainingSeconds--;
-        updateTimerDisplay();
-
-        if (timerRemainingSeconds <= 0) {
-          clearInterval(timerInterval);
-          isTimerRunning = false;
-          timerToggleBtn.innerText = 'start';
-          playChime();
-          onFocusSessionComplete();
-        }
-      }, 1000);
-    }
-
-    function pauseFocusTimer() {
-      isTimerRunning = false;
-      clearInterval(timerInterval);
-      timerToggleBtn.innerText = 'resume';
     }
 
     function resetFocusTimer() {
@@ -1233,28 +1263,37 @@
     function applyCustomTimer() {
       const val = parseInt(customTimerInput.value, 10);
       if (isNaN(val) || val <= 0) {
-        showToast('enter a valid positive number of minutes');
+        window.showToast('enter a valid positive number of minutes');
         return;
       }
       document.querySelectorAll('.timer-mode-btn').forEach(btn => btn.classList.remove('active'));
       timerTotalSeconds = val * 60;
       timerRemainingSeconds = timerTotalSeconds;
       resetFocusTimer();
-      showToast(`timer set to ${val} minute${val === 1 ? '' : 's'}`);
+      window.showToast(`timer set to ${val}m`);
     }
 
-    function setFocusTask(id, text, listId) {
+    timerToggleBtn.onclick = toggleFocusTimer;
+    timerResetBtn.onclick = resetFocusTimer;
+    document.getElementById('mode-25').onclick = () => setTimerDuration(25);
+    document.getElementById('mode-5').onclick = () => setTimerDuration(5);
+    document.getElementById('mode-15').onclick = () => setTimerDuration(15);
+    customTimerBtn.onclick = applyCustomTimer;
+    customTimerInput.onkeydown = (e) => { if (e.key === 'Enter') applyCustomTimer(); };
+
+    window.setFocusTask = function(id, text, listId) {
       activeFocusTask = { id, text, listId };
       focusTaskName.innerText = text;
       focusClearBtn.style.display = 'inline-block';
-      showToast(`focus target: "${text}"`);
-    }
+      window.showToast(`focus target: "${text}"`);
+    };
 
-    function clearFocusTask() {
+    window.clearFocusTask = function() {
       activeFocusTask = null;
       focusTaskName.innerText = 'none';
       focusClearBtn.style.display = 'none';
-    }
+    };
+    focusClearBtn.onclick = window.clearFocusTask;
 
     function onFocusSessionComplete() {
       if (activeFocusTask) {
@@ -1264,16 +1303,15 @@
           if (task) {
             task.pomodoros = (task.pomodoros || 0) + 1;
             renderTasks();
-            window.persistWorkspace();
-            showToast(`session completed for "${task.text}" (pomodoros: ${task.pomodoros})`);
+            window.persistWorkspace(true);
+            window.showToast(`session completed for "${task.text}" (cycles: ${task.pomodoros})`);
             return;
           }
         }
       }
-      showToast('focus session completed!');
+      window.showToast('focus session completed!');
     }
 
-    // Web Audio Synthesized Chime
     function playChime() {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1347,12 +1385,15 @@
       return result;
     }
 
-    // Sub-lists Management
+    // ==========================================
+    // SUB-LISTS & TASKS
+    // ==========================================
     const sublistsContainer = document.getElementById('sublists-container');
     const newListInput = document.getElementById('new-list-input');
     const taskTextInput = document.getElementById('task-text-input');
     const taskDateInput = document.getElementById('task-date-input');
     const taskRepeatInput = document.getElementById('task-repeat-input');
+    const taskAddBtn = document.getElementById('task-add-btn');
     const taskList = document.getElementById('task-list');
 
     window.renderSublists = function() {
@@ -1369,9 +1410,19 @@
         const count = (window.workspace.todoLists[name] || []).filter(t => !t.done).length;
         
         chip.innerHTML = `
-          <span onclick="switchSublist('${escapeJsString(name)}')">${escapeMarkup(name)} (${count})</span>
-          ${name !== 'main' ? `<span class="chip-del" onclick="deleteSublist('${escapeJsString(name)}', event)">×</span>` : ''}
+          <span class="chip-label">${escapeMarkup(name)} (${count})</span>
+          ${name !== 'main' ? `<span class="chip-del" title="Delete list">×</span>` : ''}
         `;
+
+        chip.querySelector('.chip-label').onclick = () => window.switchSublist(name);
+        const delBtn = chip.querySelector('.chip-del');
+        if (delBtn) {
+          delBtn.onclick = (e) => {
+            e.stopPropagation();
+            window.deleteSublist(name);
+          };
+        }
+
         sublistsContainer.appendChild(chip);
       });
 
@@ -1382,10 +1433,10 @@
       window.workspace.currentListId = name;
       renderSublists();
       renderTasks();
+      window.persistWorkspace(true);
     };
 
-    window.deleteSublist = function(name, evt) {
-      evt.stopPropagation();
+    window.deleteSublist = function(name) {
       delete window.workspace.todoLists[name];
       if (window.workspace.currentListId === name) {
         window.workspace.currentListId = Object.keys(window.workspace.todoLists)[0] || "main";
@@ -1393,11 +1444,11 @@
       renderSublists();
       renderTasks();
       renderCalendarView();
-      window.persistWorkspace();
-      showToast(`list "${name}" deleted`);
+      window.persistWorkspace(true);
+      window.showToast(`list "${name}" removed`);
     };
 
-    newListInput.addEventListener('keydown', (e) => {
+    newListInput.onkeydown = (e) => {
       if (e.key === 'Enter') {
         const val = newListInput.value.trim().toLowerCase();
         if (val && !window.workspace.todoLists[val]) {
@@ -1406,12 +1457,11 @@
           newListInput.value = '';
           renderSublists();
           renderTasks();
-          window.persistWorkspace();
+          window.persistWorkspace(true);
         }
       }
-    });
+    };
 
-    // Task Rendering & Recurring Logic
     window.renderTasks = function() {
       taskList.innerHTML = '';
       const list = window.workspace.todoLists[window.workspace.currentListId] || [];
@@ -1445,7 +1495,7 @@
 
         li.innerHTML = `
           <label class="item-label">
-            <input type="checkbox" class="checkbox" ${item.done ? 'checked' : ''} onchange="toggleTask(${originalIdx})">
+            <input type="checkbox" class="checkbox" ${item.done ? 'checked' : ''}>
             <div class="item-content">
               <span class="item-text" style="color: ${item.done ? '#666666' : urgency.color};">
                 ${escapeMarkup(item.text)}
@@ -1458,11 +1508,15 @@
             </div>
           </label>
           <div class="row-actions">
-            <button class="action-btn" title="Focus Timer" style="${isBoundToTimer ? 'color: #22c55e;' : ''}" 
-              onclick="setFocusTask('${item.id}', '${escapeJsString(item.text)}', '${window.workspace.currentListId}')">&#9201;</button>
-            <button class="action-btn" onclick="removeTask(${originalIdx})">×</button>
+            <button class="action-btn timer-btn-task" title="Focus Timer" style="${isBoundToTimer ? 'color: #22c55e;' : ''}">&#9201;</button>
+            <button class="action-btn del-task-btn">×</button>
           </div>
         `;
+
+        li.querySelector('.checkbox').onchange = () => window.toggleTask(originalIdx);
+        li.querySelector('.timer-btn-task').onclick = () => window.setFocusTask(item.id, item.text, window.workspace.currentListId);
+        li.querySelector('.del-task-btn').onclick = () => window.removeTask(originalIdx);
+
         taskList.appendChild(li);
       });
     };
@@ -1495,7 +1549,7 @@
         task.dueDate = baseDate.toISOString();
         task.done = false;
 
-        showToast(`recurring ${task.repeat}: advanced to ${baseDate.toLocaleDateString()} (cycle: ${task.streak})`);
+        window.showToast(`recurring ${task.repeat}: advanced to ${baseDate.toLocaleDateString()} (cycle ${task.streak})`);
       } else {
         task.done = !task.done;
       }
@@ -1503,20 +1557,20 @@
       renderTasks();
       renderSublists();
       renderCalendarView();
-      window.persistWorkspace();
+      window.persistWorkspace(true);
     };
 
     window.removeTask = function(index) {
       const items = window.workspace.todoLists[window.workspace.currentListId];
       if (!items) return;
       if (activeFocusTask && items[index] && activeFocusTask.id === items[index].id) {
-        clearFocusTask();
+        window.clearFocusTask();
       }
       items.splice(index, 1);
       renderTasks();
       renderSublists();
       renderCalendarView();
-      window.persistWorkspace();
+      window.persistWorkspace(true);
     };
 
     function addTaskFromInput() {
@@ -1530,7 +1584,7 @@
       }
 
       window.workspace.todoLists[window.workspace.currentListId].unshift({
-        id: 't-' + Date.now(),
+        id: 't-' + Date.now() + '-' + Math.floor(Math.random()*1000),
         text,
         dueDate,
         repeat,
@@ -1547,15 +1601,16 @@
       renderTasks();
       renderSublists();
       renderCalendarView();
-      window.persistWorkspace();
+      window.persistWorkspace(true);
     }
 
-    taskTextInput.addEventListener('keydown', (e) => {
+    taskAddBtn.onclick = addTaskFromInput;
+    taskTextInput.onkeydown = (e) => {
       if (e.key === 'Enter') addTaskFromInput();
-    });
+    };
 
     // ==========================================
-    // CALENDAR SYSTEM (Month, Week, Day/Hour)
+    // CALENDAR VIEWS & ACTIONS
     // ==========================================
     let calMode = 'month';
     let calCurrentDate = new Date();
@@ -1567,6 +1622,7 @@
     const calTaskText = document.getElementById('cal-task-text');
     const calTaskTime = document.getElementById('cal-task-time');
     const calTaskRepeat = document.getElementById('cal-task-repeat');
+    const calScheduleBtn = document.getElementById('cal-schedule-btn');
     const calEventList = document.getElementById('cal-event-list');
 
     function dateToYMD(d) {
@@ -1579,28 +1635,40 @@
     function switchCalMode(mode) {
       calMode = mode;
       document.querySelectorAll('.mode-btn').forEach(b => {
-        b.classList.toggle('active', b.id === `mode-${mode}`);
+        b.classList.toggle('active', b.id === `mode-btn-${mode}`);
       });
       renderCalendarView();
     }
 
-    function calGoToday() {
+    document.getElementById('mode-btn-month').onclick = () => switchCalMode('month');
+    document.getElementById('mode-btn-week').onclick = () => switchCalMode('week');
+    document.getElementById('mode-btn-day').onclick = () => switchCalMode('day');
+
+    document.getElementById('cal-today-btn').onclick = () => {
       calCurrentDate = new Date();
       calSelectedDate = new Date();
       renderCalendarView();
-    }
+    };
 
-    function calNavigate(delta) {
-      if (calMode === 'month') {
-        calCurrentDate.setMonth(calCurrentDate.getMonth() + delta);
-      } else if (calMode === 'week') {
-        calCurrentDate.setDate(calCurrentDate.getDate() + (delta * 7));
-      } else if (calMode === 'day') {
-        calCurrentDate.setDate(calCurrentDate.getDate() + delta);
+    document.getElementById('cal-prev-btn').onclick = () => {
+      if (calMode === 'month') calCurrentDate.setMonth(calCurrentDate.getMonth() - 1);
+      else if (calMode === 'week') calCurrentDate.setDate(calCurrentDate.getDate() - 7);
+      else if (calMode === 'day') {
+        calCurrentDate.setDate(calCurrentDate.getDate() - 1);
         calSelectedDate = new Date(calCurrentDate);
       }
       renderCalendarView();
-    }
+    };
+
+    document.getElementById('cal-next-btn').onclick = () => {
+      if (calMode === 'month') calCurrentDate.setMonth(calCurrentDate.getMonth() + 1);
+      else if (calMode === 'week') calCurrentDate.setDate(calCurrentDate.getDate() + 7);
+      else if (calMode === 'day') {
+        calCurrentDate.setDate(calCurrentDate.getDate() + 1);
+        calSelectedDate = new Date(calCurrentDate);
+      }
+      renderCalendarView();
+    };
 
     function selectDate(dateObj) {
       calSelectedDate = new Date(dateObj);
@@ -1794,7 +1862,7 @@
         empty.style.color = 'var(--text-faint)';
         empty.style.fontSize = '0.82rem';
         empty.style.padding = '8px 0';
-        empty.innerText = 'no tasks or events scheduled for this day.';
+        empty.innerText = 'no tasks scheduled for this date.';
         calEventList.appendChild(empty);
         return;
       }
@@ -1821,8 +1889,10 @@
               </div>
             </div>
           </div>
-          <button class="action-btn" onclick="removeScheduledTask('${t.listId}', '${t.id}')">×</button>
+          <button class="action-btn del-cal-btn">×</button>
         `;
+
+        li.querySelector('.del-cal-btn').onclick = () => window.removeScheduledTask(t.listId, t.id);
         calEventList.appendChild(li);
       });
     }
@@ -1843,7 +1913,7 @@
       }
 
       window.workspace.todoLists[targetList].unshift({
-        id: 't-' + Date.now(),
+        id: 't-' + Date.now() + '-' + Math.floor(Math.random()*1000),
         text: text,
         dueDate: due.toISOString(),
         repeat: repeat,
@@ -1859,8 +1929,13 @@
       renderTasks();
       renderSublists();
       renderCalendarView();
-      window.persistWorkspace();
+      window.persistWorkspace(true);
     }
+
+    calScheduleBtn.onclick = addTaskFromCalendar;
+    calTaskText.onkeydown = (e) => {
+      if (e.key === 'Enter') addTaskFromCalendar();
+    };
 
     window.removeScheduledTask = function(listId, taskId) {
       const items = window.workspace.todoLists[listId];
@@ -1871,19 +1946,16 @@
         renderTasks();
         renderSublists();
         renderCalendarView();
-        window.persistWorkspace();
+        window.persistWorkspace(true);
       }
     };
 
-    calTaskText.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') addTaskFromCalendar();
-    });
-
     // ==========================================
-    // STICKY NOTES SYSTEM
+    // STICKY NOTES
     // ==========================================
     const notesGrid = document.getElementById('notes-grid');
     const notesCountLabel = document.getElementById('notes-count-label');
+    const noteCreateBtn = document.getElementById('note-create-btn');
 
     window.renderStickyNotes = function() {
       notesGrid.innerHTML = '';
@@ -1896,22 +1968,25 @@
 
         card.innerHTML = `
           <div class="sticky-note-header">
-            <input type="text" class="sticky-title" value="${escapeMarkup(note.title || 'untitled')}" 
-              oninput="updateStickyTitle(${index}, this.value)" placeholder="title...">
-            <button class="action-btn" onclick="deleteStickyNote(${index})" title="Delete Note">×</button>
+            <input type="text" class="sticky-title" value="${escapeMarkup(note.title || 'untitled')}" placeholder="title...">
+            <button class="action-btn del-note-btn" title="Delete Note">×</button>
           </div>
-          <textarea class="sticky-body" placeholder="write note here..." 
-            oninput="updateStickyBody(${index}, this.value)">${escapeMarkup(note.body || '')}</textarea>
+          <textarea class="sticky-body" placeholder="write note here...">${escapeMarkup(note.body || '')}</textarea>
           <div class="sticky-footer">
             <span>${note.updatedAt || 'just now'}</span>
             <span>saved</span>
           </div>
         `;
+
+        card.querySelector('.sticky-title').oninput = (e) => window.updateStickyTitle(index, e.target.value);
+        card.querySelector('.sticky-body').oninput = (e) => window.updateStickyBody(index, e.target.value);
+        card.querySelector('.del-note-btn').onclick = () => window.deleteStickyNote(index);
+
         notesGrid.appendChild(card);
       });
     };
 
-    window.createStickyNote = function() {
+    noteCreateBtn.onclick = function() {
       if (!window.workspace.stickyNotes) window.workspace.stickyNotes = [];
       window.workspace.stickyNotes.unshift({
         id: 'note-' + Date.now(),
@@ -1920,21 +1995,21 @@
         updatedAt: new Date().toLocaleDateString()
       });
       renderStickyNotes();
-      window.persistWorkspace();
+      window.persistWorkspace(true);
     };
 
     window.deleteStickyNote = function(index) {
       window.workspace.stickyNotes.splice(index, 1);
       renderStickyNotes();
-      window.persistWorkspace();
-      showToast('sticky note deleted');
+      window.persistWorkspace(true);
+      window.showToast('sticky note removed');
     };
 
     window.updateStickyTitle = function(index, val) {
       if (window.workspace.stickyNotes[index]) {
         window.workspace.stickyNotes[index].title = val;
         window.workspace.stickyNotes[index].updatedAt = new Date().toLocaleDateString();
-        window.persistWorkspace();
+        window.persistWorkspace(false);
       }
     };
 
@@ -1942,11 +2017,10 @@
       if (window.workspace.stickyNotes[index]) {
         window.workspace.stickyNotes[index].body = val;
         window.workspace.stickyNotes[index].updatedAt = new Date().toLocaleDateString();
-        window.persistWorkspace();
+        window.persistWorkspace(false);
       }
     };
 
-    // Helpers
     function escapeMarkup(str) {
       if (!str) return '';
       const div = document.createElement('div');
@@ -1954,13 +2028,12 @@
       return div.innerHTML;
     }
 
-    function escapeJsString(str) {
-      return (str || '').replace(/'/g, "\\'");
-    }
-
-    // Initial render
+    // Initial first-paint render
     renderSublists();
     renderTasks();
+
+    // Start Authentication & Storage Setup
+    initStorage();
   </script>
 </body>
 </html>
