@@ -1,155 +1,548 @@
 <!DOCTYPE html>
-<!--
-  ================================================================
-  READ THIS BEFORE YOU PASTE ANYTHING
-
-  When Gemini gives you a page, you do NOT paste it into a part of
-  this file. You replace the entire file.
-
-  Click into the editor, press Ctrl+A (Cmd+A on Mac), press Delete,
-  then paste. Everything here is meant to be thrown away.
-
-  Do that only AFTER your live link works. Get the link first.
-  ================================================================
--->
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My first site_Luis_Scheibe</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Unbounded:wght@600;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --navy: #0d1d30;
-    --card: #142a44;
-    --line: #27466a;
-    --aqua: #6de1d7;
-    --text: #ffffff;
-    --muted: #94a9bf;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--navy);
-    color: var(--text);
-    font-family: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
-    line-height: 1.6;
-    display: flex;
-    justify-content: center;
-    padding: 6vh 20px;
-  }
-  main { width: 100%; max-width: 640px; }
-  .badge {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--aqua);
-    margin-bottom: 18px;
-  }
-  h1 {
-    font-family: "Unbounded", "Manrope", sans-serif;
-    font-weight: 800;
-    font-size: clamp(38px, 9vw, 68px);
-    letter-spacing: -0.05em;
-    line-height: 1.02;
-    margin: 0 0 8px;
-  }
-  .name {
-    font-family: "Unbounded", "Manrope", sans-serif;
-    font-weight: 600;
-    font-size: clamp(18px, 4vw, 24px);
-    letter-spacing: -0.04em;
-    color: var(--aqua);
-    margin: 0 0 24px;
-  }
-  p.lead { font-size: 18px; color: var(--muted); margin: 0 0 34px; }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 26px 28px;
-    margin-bottom: 18px;
-  }
-  .card h2 {
-    font-family: "Unbounded", "Manrope", sans-serif;
-    font-weight: 600;
-    font-size: 15px;
-    letter-spacing: -0.03em;
-    text-transform: uppercase;
-    color: var(--aqua);
-    margin: 0 0 16px;
-  }
-  ol { margin: 0; padding-left: 20px; }
-  li { margin-bottom: 12px; color: var(--muted); }
-  li:last-child { margin-bottom: 0; }
-  li b { color: var(--text); font-weight: 700; }
-  code {
-    font-family: ui-monospace, "SF Mono", Consolas, monospace;
-    font-size: 0.92em;
-    background: #0a1727;
-    border: 1px solid var(--line);
-    border-radius: 5px;
-    padding: 1px 6px;
-    color: var(--aqua);
-  }
-  a { color: var(--aqua); }
-  footer {
-    margin-top: 30px;
-    font-size: 14px;
-    color: #6e839a;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OLED Workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000000;
+      --panel-border: #141414;
+      --text: #e0e0e0;
+      --muted: #555555;
+      --dim: #262626;
+      --accent: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 48px 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 660px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 16px;
+    }
+
+    .brand {
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 20px;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+      padding: 4px 0;
+      text-transform: lowercase;
+      letter-spacing: 0.05em;
+      transition: color 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom: 1px solid var(--accent);
+    }
+
+    .view-panel {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .view-panel.active {
+      display: flex;
+    }
+
+    /* Minimal Input Styles */
+    .input-row {
+      display: flex;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 8px;
+    }
+
+    .minimal-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      width: 100%;
+    }
+
+    .minimal-input::placeholder {
+      color: var(--dim);
+    }
+
+    /* List & Items */
+    .item-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.9rem;
+    }
+
+    .item-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+      flex: 1;
+      word-break: break-word;
+    }
+
+    .checkbox {
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--muted);
+      background: transparent;
+      cursor: pointer;
+      display: grid;
+      place-content: center;
+      border-radius: 0;
+      flex-shrink: 0;
+    }
+
+    .checkbox:checked {
+      background: var(--muted);
+      border-color: var(--muted);
+    }
+
+    .checkbox:checked::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background: var(--bg);
+    }
+
+    .item-text {
+      color: var(--text);
+      transition: color 0.15s ease;
+    }
+
+    .checkbox:checked ~ .item-text {
+      color: var(--muted);
+      text-decoration: line-through;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--dim);
+      font-family: inherit;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 2px 6px;
+      transition: color 0.15s ease;
+    }
+
+    .action-btn:hover {
+      color: var(--text);
+    }
+
+    /* Calendar */
+    .cal-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .cal-nav {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 2px 6px;
+    }
+
+    .cal-nav:hover {
+      color: var(--accent);
+    }
+
+    .cal-matrix {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    .matrix-head {
+      color: var(--dim);
+      padding: 6px 0;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    .matrix-cell {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--panel-border);
+      cursor: pointer;
+      color: var(--muted);
+      position: relative;
+    }
+
+    .matrix-cell:hover {
+      border-color: var(--muted);
+    }
+
+    .matrix-cell.active-day {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .matrix-cell.is-today {
+      color: var(--text);
+    }
+
+    .matrix-cell.empty {
+      border: none;
+      cursor: default;
+    }
+
+    .event-indicator {
+      width: 3px;
+      height: 3px;
+      background: var(--muted);
+      position: absolute;
+      bottom: 4px;
+    }
+
+    .matrix-cell.active-day .event-indicator {
+      background: var(--accent);
+    }
+
+    .cal-schedule {
+      border-top: 1px solid var(--panel-border);
+      padding-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .cal-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    /* Notes Area */
+    .note-sheet {
+      width: 100%;
+      height: 480px;
+      background: transparent;
+      border: 1px solid var(--panel-border);
+      outline: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      padding: 16px;
+      resize: vertical;
+    }
+
+    .note-sheet:focus {
+      border-color: var(--muted);
+    }
+
+    .note-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--dim);
+    }
+  </style>
 </head>
 <body>
-<main>
+  <div class="container">
+    <header>
+      <div class="brand">sys // workspace</div>
+      <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="navigate('tasks')">tasks</button>
+        <button class="tab-btn" onclick="navigate('calendar')">calendar</button>
+        <button class="tab-btn" onclick="navigate('notes')">notes</button>
+      </nav>
+    </header>
 
-  <span class="badge">Cal Poly Vibe Coding &middot; Session 01</span>
+    <!-- 1. Tasks Panel -->
+    <main id="tasks" class="view-panel active">
+      <div class="input-row">
+        <input type="text" id="task-input" class="minimal-input" placeholder="type a task and press enter..." autocomplete="off">
+      </div>
+      <ul id="task-list" class="item-list"></ul>
+    </main>
 
-  <h1>It&rsquo;s live.</h1>
+    <!-- 2. Calendar Panel -->
+    <section id="calendar" class="view-panel">
+      <div class="cal-controls">
+        <button class="cal-nav" onclick="offsetMonth(-1)">&lt;</button>
+        <span id="cal-month-name"></span>
+        <button class="cal-nav" onclick="offsetMonth(1)">&gt;</button>
+      </div>
+      <div class="cal-matrix" id="cal-matrix"></div>
+      
+      <div class="cal-schedule">
+        <div class="cal-label" id="cal-schedule-date">select a day</div>
+        <div class="input-row">
+          <input type="text" id="event-input" class="minimal-input" placeholder="add note/event for selected date..." autocomplete="off">
+        </div>
+        <ul id="event-list" class="item-list"></ul>
+      </div>
+    </section>
 
-  <!-- Step 5: change the name below to yours, then commit. -->
-  <p class="name">Built by Luis Scheibe</p>
-
-  <p class="lead">
-    This page is on the internet. Anyone you send this link to can open it,
-    on any device, right now. You made that happen in about five minutes.
-  </p>
-
-  <div class="card">
-    <h2>Three things, in this order</h2>
-    <ol>
-      <li><b>Put your name on it.</b> Edit <code>index.html</code>, change
-        YOUR NAME HERE above, commit, refresh this page.</li>
-      <li><b>Submit this link.</b> Go to
-        <a href="https://www.calpolyvibecoding.com/">calpolyvibecoding.com</a>,
-        make an account, and paste this URL in. That is how you get counted,
-        and how Claude seats get assigned.</li>
-      <li><b>Then build.</b> Open Gemini, get a page, and replace this entire
-        file with it.</li>
-    </ol>
+    <!-- 3. Notes Panel -->
+    <section id="notes" class="view-panel">
+      <textarea id="note-text" class="note-sheet" placeholder="ink scratchpad..."></textarea>
+      <div class="note-footer">
+        <span id="note-count">0 words</span>
+        <span id="note-state">in-sync</span>
+      </div>
+    </section>
   </div>
 
-  <div class="card">
-    <h2>How to replace this page</h2>
-    <ol>
-      <li>Copy what Gemini gives you with the <b>copy button</b> on the code
-        block. Do not click and drag.</li>
-      <li>Open <code>index.html</code> here and click the pencil icon.</li>
-      <li><b>Ctrl+A</b> (<b>Cmd+A</b> on Mac), then <b>Delete</b>. All of it.
-        Yes, really.</li>
-      <li>Paste, commit, refresh.</li>
-    </ol>
-  </div>
+  <script>
+    // Tab State
+    function navigate(viewName) {
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.toggle('active', b.innerText === viewName);
+      });
+      document.querySelectorAll('.view-panel').forEach(p => {
+        p.classList.toggle('active', p.id === viewName);
+      });
+      if (viewName === 'calendar') renderCalendar();
+    }
 
-  <footer>
-    Nothing on this page is precious. It exists so the link has something to
-    show before you have something of your own.
-  </footer>
+    // Task Engine (In-memory single session default)
+    let tasks = [];
+    const taskInput = document.getElementById('task-input');
+    const taskList = document.getElementById('task-list');
 
-</main>
+    function renderTasks() {
+      taskList.innerHTML = '';
+      tasks.forEach((t, i) => {
+        const li = document.createElement('li');
+        li.className = 'item-row';
+        li.innerHTML = `
+          <label class="item-label">
+            <input type="checkbox" class="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})">
+            <span class="item-text">${escapeMarkup(t.text)}</span>
+          </label>
+          <button class="action-btn" onclick="removeTask(${i})">×</button>
+        `;
+        taskList.appendChild(li);
+      });
+    }
+
+    function toggleTask(index) {
+      tasks[index].done = !tasks[index].done;
+      renderTasks();
+    }
+
+    function removeTask(index) {
+      tasks.splice(index, 1);
+      renderTasks();
+    }
+
+    taskInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && taskInput.value.trim()) {
+        tasks.unshift({ text: taskInput.value.trim(), done: false });
+        taskInput.value = '';
+        renderTasks();
+      }
+    });
+
+    // Calendar Engine
+    let activeCalDate = new Date();
+    let currentSelectedDateKey = dateToKey(new Date());
+    let calendarEvents = {};
+
+    const calMatrix = document.getElementById('cal-matrix');
+    const calMonthName = document.getElementById('cal-month-name');
+    const calScheduleDate = document.getElementById('cal-schedule-date');
+    const eventInput = document.getElementById('event-input');
+    const eventList = document.getElementById('event-list');
+
+    function dateToKey(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function offsetMonth(offset) {
+      activeCalDate.setMonth(activeCalDate.getMonth() + offset);
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      calMatrix.innerHTML = '';
+      const year = activeCalDate.getFullYear();
+      const month = activeCalDate.getMonth();
+
+      const months = ['january', 'february', 'march', 'april', 'may', 'june', 
+                      'july', 'august', 'september', 'october', 'november', 'december'];
+      calMonthName.innerText = `${months[month]} ${year}`;
+
+      const weekdayNames = ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'];
+      weekdayNames.forEach(name => {
+        const col = document.createElement('div');
+        col.className = 'matrix-head';
+        col.innerText = name;
+        calMatrix.appendChild(col);
+      });
+
+      const firstDayDayOfWeek = new Date(year, month, 1).getDay();
+      const daysCountInMonth = new Date(year, month + 1, 0).getDate();
+      const todayKey = dateToKey(new Date());
+
+      for (let i = 0; i < firstDayDayOfWeek; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'matrix-cell empty';
+        calMatrix.appendChild(emptyCell);
+      }
+
+      for (let day = 1; day <= daysCountInMonth; day++) {
+        const cell = document.createElement('div');
+        cell.className = 'matrix-cell';
+        const dayKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+        if (dayKey === todayKey) cell.classList.add('is-today');
+        if (dayKey === currentSelectedDateKey) cell.classList.add('active-day');
+
+        cell.innerText = day;
+
+        if (calendarEvents[dayKey] && calendarEvents[dayKey].length > 0) {
+          const marker = document.createElement('div');
+          marker.className = 'event-indicator';
+          cell.appendChild(marker);
+        }
+
+        cell.onclick = () => {
+          currentSelectedDateKey = dayKey;
+          renderCalendar();
+          renderSchedule();
+        };
+
+        calMatrix.appendChild(cell);
+      }
+      renderSchedule();
+    }
+
+    function renderSchedule() {
+      calScheduleDate.innerText = currentSelectedDateKey ? `entries :: ${currentSelectedDateKey}` : 'select a day';
+      eventList.innerHTML = '';
+      const entries = calendarEvents[currentSelectedDateKey] || [];
+      entries.forEach((entry, idx) => {
+        const li = document.createElement('li');
+        li.className = 'item-row';
+        li.innerHTML = `
+          <span class="item-text">${escapeMarkup(entry)}</span>
+          <button class="action-btn" onclick="removeEvent('${currentSelectedDateKey}', ${idx})">×</button>
+        `;
+        eventList.appendChild(li);
+      });
+    }
+
+    function removeEvent(key, idx) {
+      calendarEvents[key].splice(idx, 1);
+      if (calendarEvents[key].length === 0) delete calendarEvents[key];
+      renderCalendar();
+    }
+
+    eventInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && eventInput.value.trim()) {
+        if (!currentSelectedDateKey) return;
+        if (!calendarEvents[currentSelectedDateKey]) calendarEvents[currentSelectedDateKey] = [];
+        calendarEvents[currentSelectedDateKey].push(eventInput.value.trim());
+        eventInput.value = '';
+        renderCalendar();
+      }
+    });
+
+    // Notes Scratchpad Engine
+    const noteText = document.getElementById('note-text');
+    const noteCount = document.getElementById('note-count');
+    const noteState = document.getElementById('note-state');
+    let debounceTimer = null;
+
+    noteText.addEventListener('input', () => {
+      noteState.innerText = 'typing...';
+      const words = noteText.value.trim() ? noteText.value.trim().split(/\s+/).length : 0;
+      noteCount.innerText = `${words} word${words === 1 ? '' : 's'}`;
+
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        noteState.innerText = 'in-sync';
+      }, 400);
+    });
+
+    // Utility
+    function escapeMarkup(str) {
+      const el = document.createElement('div');
+      el.innerText = str;
+      return el.innerHTML;
+    }
+
+    // Initial render
+    renderTasks();
+  </script>
 </body>
 </html>
