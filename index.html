@@ -6,17 +6,17 @@
   <title>OLED Workspace</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
   
   <style>
     :root {
       --bg: #000000;
-      --panel-border: #141414;
-      --text: #e0e0e0;
-      --muted: #555555;
-      --dim: #262626;
+      --panel-border: #1f1f1f;
+      --border-subtle: #141414;
+      --text: #ffffff;
+      --text-dim: #777777;
+      --text-faint: #444444;
       --accent: #ffffff;
-      --accent-green: #38bdf8;
     }
 
     * {
@@ -32,24 +32,25 @@
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      padding: 36px 20px;
+      padding: 28px 16px;
       -webkit-font-smoothing: antialiased;
     }
 
     .container {
       width: 100%;
-      max-width: 660px;
+      max-width: 880px;
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 20px;
     }
 
+    /* Header & Account */
     header {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
       border-bottom: 1px solid var(--panel-border);
-      padding-bottom: 16px;
+      padding-bottom: 14px;
     }
 
     .header-top {
@@ -61,15 +62,15 @@
     }
 
     .brand {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--muted);
+      font-weight: 500;
     }
 
     .account-meta {
-      font-size: 0.72rem;
-      color: var(--dim);
+      font-size: 0.74rem;
+      color: var(--text);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -78,32 +79,26 @@
     .sync-pill {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      color: var(--muted);
+      gap: 6px;
     }
 
     .sync-dot {
-      width: 5px;
-      height: 5px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
-      background: var(--muted);
+      background: var(--text-dim);
       display: inline-block;
       transition: background 0.2s ease;
     }
 
-    .sync-dot.synced {
-      background: #22c55e;
-    }
-
-    .sync-dot.saving {
-      background: #eab308;
-    }
+    .sync-dot.synced { background: #22c55e; }
+    .sync-dot.saving { background: #eab308; }
 
     .uid-tag {
-      color: var(--muted);
+      color: var(--text);
       cursor: pointer;
-      border-bottom: 1px dotted var(--dim);
-      max-width: 220px;
+      border-bottom: 1px dotted var(--text-dim);
+      max-width: 180px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -117,9 +112,9 @@
     .tab-btn {
       background: none;
       border: none;
-      color: var(--muted);
+      color: var(--text-dim);
       font-family: inherit;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       cursor: pointer;
       padding: 4px 0;
       text-transform: lowercase;
@@ -127,29 +122,215 @@
       transition: color 0.15s ease;
     }
 
-    .tab-btn:hover {
-      color: var(--text);
-    }
-
+    .tab-btn:hover { color: var(--text); }
     .tab-btn.active {
       color: var(--accent);
       border-bottom: 1px solid var(--accent);
     }
 
+    /* Minimal Focus / Pomodoro Bar */
+    .focus-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      border: 1px solid var(--panel-border);
+      padding: 10px 14px;
+      background: #000000;
+      font-size: 0.82rem;
+    }
+
+    .focus-cluster {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .focus-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    .timer-display {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--text);
+      min-width: 62px;
+    }
+
+    .timer-btn {
+      background: #000000;
+      border: 1px solid var(--panel-border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.76rem;
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .timer-btn:hover {
+      border-color: var(--text);
+    }
+
+    .timer-mode-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-family: inherit;
+      font-size: 0.76rem;
+      cursor: pointer;
+      padding: 2px 4px;
+    }
+
+    .timer-mode-btn:hover { color: var(--text); }
+    .timer-mode-btn.active {
+      color: var(--text);
+      border-bottom: 1px solid var(--text);
+    }
+
+    .custom-timer-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-left: 1px solid var(--panel-border);
+      padding-left: 8px;
+      margin-left: 2px;
+    }
+
+    .custom-timer-input {
+      width: 48px;
+      background: #000000;
+      border: 1px solid var(--panel-border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.76rem;
+      padding: 2px 4px;
+      outline: none;
+      text-align: center;
+      -moz-appearance: textfield;
+    }
+
+    .custom-timer-input::-webkit-outer-spin-button,
+    .custom-timer-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .custom-timer-input:focus {
+      border-color: var(--text);
+    }
+
+    .custom-timer-input::placeholder {
+      color: var(--text-faint);
+      font-size: 0.7rem;
+    }
+
+    .focus-target-task {
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 320px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .focus-target-task span.active-task-name {
+      color: var(--text);
+      text-decoration: underline;
+    }
+
+    /* Notification banner */
+    .toast-banner {
+      display: none;
+      font-size: 0.76rem;
+      padding: 6px 12px;
+      border: 1px solid var(--text-dim);
+      background: #0a0a0a;
+      color: var(--text);
+      animation: fadeIn 0.2s ease;
+    }
+
     .view-panel {
       display: none;
       flex-direction: column;
-      gap: 20px;
+      gap: 18px;
     }
 
     .view-panel.active {
       display: flex;
     }
 
-    .input-row {
+    /* Sub-list Folders */
+    .sublists-bar {
       display: flex;
-      border-bottom: 1px solid var(--panel-border);
-      padding-bottom: 8px;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .sublist-chip {
+      background: transparent;
+      border: 1px solid var(--panel-border);
+      color: var(--text-dim);
+      font-family: inherit;
+      font-size: 0.78rem;
+      padding: 4px 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .sublist-chip:hover {
+      border-color: var(--text);
+      color: var(--text);
+    }
+
+    .sublist-chip.active {
+      border-color: var(--text);
+      color: var(--text);
+      background: #0d0d0d;
+    }
+
+    .chip-del {
+      font-size: 0.8rem;
+      opacity: 0.6;
+      cursor: pointer;
+    }
+    .chip-del:hover { opacity: 1; }
+
+    .new-list-input {
+      background: transparent;
+      border: 1px dashed var(--panel-border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.76rem;
+      padding: 3px 8px;
+      width: 110px;
+      outline: none;
+    }
+
+    /* Task Add Form */
+    .task-creator-box {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      border: 1px solid var(--panel-border);
+      padding: 12px;
+      background: #000000;
     }
 
     .minimal-input {
@@ -158,27 +339,89 @@
       outline: none;
       color: var(--text);
       font-family: inherit;
-      font-size: 0.95rem;
-      width: 100%;
+      font-size: 0.92rem;
+      flex: 1 1 200px;
     }
 
     .minimal-input::placeholder {
-      color: var(--dim);
+      color: var(--text-faint);
     }
 
-    /* Items and Lists */
+    .date-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      border-left: 1px solid var(--panel-border);
+      padding-left: 10px;
+    }
+
+    .date-picker-dark {
+      background: #000000;
+      color: var(--text);
+      border: 1px solid var(--panel-border);
+      font-family: inherit;
+      font-size: 0.78rem;
+      padding: 4px 6px;
+      outline: none;
+      color-scheme: dark;
+    }
+
+    .btn-add {
+      background: #000000;
+      border: 1px solid var(--panel-border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-add:hover {
+      border-color: var(--text);
+    }
+
+    /* Urgency Scale Legend */
+    .urgency-legend {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      flex-wrap: wrap;
+      padding: 2px 0;
+    }
+
+    .rainbow-indicator {
+      display: inline-flex;
+      height: 4px;
+      width: 80px;
+      border-radius: 2px;
+      background: linear-gradient(to right, #9333ea, #3b82f6, #06b6d4, #22c55e, #eab308, #f97316, #ef4444);
+    }
+
+    /* Task Rows */
     .item-list {
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .item-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 0.9rem;
+      gap: 12px;
+      padding: 8px 10px;
+      border: 1px solid var(--panel-border);
+      background: #000000;
+      transition: border-color 0.2s ease;
+    }
+
+    .item-row:hover {
+      border-color: #333333;
     }
 
     .item-label {
@@ -193,9 +436,9 @@
 
     .checkbox {
       appearance: none;
-      width: 14px;
-      height: 14px;
-      border: 1px solid var(--muted);
+      width: 16px;
+      height: 16px;
+      border: 1px solid var(--text);
       background: transparent;
       cursor: pointer;
       display: grid;
@@ -205,34 +448,79 @@
     }
 
     .checkbox:checked {
-      background: var(--muted);
-      border-color: var(--muted);
+      background: var(--text);
+      border-color: var(--text);
     }
 
     .checkbox:checked::before {
       content: "";
       width: 6px;
       height: 6px;
-      background: var(--bg);
+      background: #000000;
+    }
+
+    .item-content {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
     }
 
     .item-text {
-      color: var(--text);
-      transition: color 0.15s ease;
+      font-size: 0.92rem;
+      transition: color 0.15s ease, opacity 0.15s ease;
     }
 
-    .checkbox:checked ~ .item-text {
-      color: var(--muted);
+    .checkbox:checked ~ .item-content .item-text {
+      color: #666666 !important;
       text-decoration: line-through;
+    }
+
+    .badges-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .due-badge {
+      font-size: 0.72rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0.9;
+    }
+
+    .repeat-badge {
+      font-size: 0.68rem;
+      color: var(--text);
+      border: 1px solid var(--panel-border);
+      padding: 1px 5px;
+      border-radius: 2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .pomodoro-badge {
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      border: 1px dotted var(--panel-border);
+      padding: 1px 4px;
+    }
+
+    .row-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .action-btn {
       background: none;
       border: none;
-      color: var(--dim);
+      color: var(--text-dim);
       font-family: inherit;
       cursor: pointer;
-      font-size: 0.85rem;
+      font-size: 0.95rem;
       padding: 2px 6px;
       transition: color 0.15s ease;
     }
@@ -241,30 +529,59 @@
       color: var(--text);
     }
 
-    .cal-controls {
+    /* Calendar Controls & Modes */
+    .cal-header-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-bottom: 4px;
+      flex-wrap: wrap;
+      gap: 10px;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 12px;
     }
 
-    .cal-nav {
+    .cal-view-modes {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mode-btn {
       background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
+      border: 1px solid var(--panel-border);
+      color: var(--text-dim);
       font-family: inherit;
-      font-size: 0.85rem;
-      padding: 2px 6px;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      cursor: pointer;
+      transition: all 0.15s;
     }
 
-    .cal-nav:hover {
-      color: var(--accent);
+    .mode-btn.active {
+      border-color: var(--text);
+      color: var(--text);
+      background: #111111;
     }
 
-    .cal-matrix {
+    .cal-nav-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.88rem;
+    }
+
+    .cal-nav-btn {
+      background: none;
+      border: 1px solid var(--panel-border);
+      color: var(--text);
+      font-family: inherit;
+      padding: 2px 8px;
+      cursor: pointer;
+    }
+
+    .cal-nav-btn:hover { border-color: var(--text); }
+
+    /* Calendar Grid Views */
+    .cal-grid-month {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 4px;
@@ -272,100 +589,260 @@
       font-size: 0.8rem;
     }
 
-    .matrix-head {
-      color: var(--dim);
+    .cal-head-cell {
+      color: var(--text-dim);
       padding: 6px 0;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       letter-spacing: 0.05em;
     }
 
-    .matrix-cell {
-      aspect-ratio: 1;
+    .cal-cell {
+      min-height: 52px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
+      padding: 6px 2px;
       border: 1px solid var(--panel-border);
       cursor: pointer;
-      color: var(--muted);
+      color: var(--text-dim);
       position: relative;
+      gap: 4px;
     }
 
-    .matrix-cell:hover {
-      border-color: var(--muted);
-    }
-
-    .matrix-cell.active-day {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .matrix-cell.is-today {
+    .cal-cell:hover {
+      border-color: var(--text);
       color: var(--text);
     }
 
-    .matrix-cell.empty {
+    .cal-cell.is-selected {
+      border-color: var(--text);
+      color: var(--text);
+      background: #0d0d0d;
+    }
+
+    .cal-cell.is-today .day-number {
+      color: var(--text);
+      font-weight: 700;
+      border-bottom: 1px solid var(--text);
+    }
+
+    .cal-cell.is-empty {
       border: none;
       cursor: default;
     }
 
-    .event-indicator {
-      width: 3px;
-      height: 3px;
-      background: var(--muted);
-      position: absolute;
-      bottom: 4px;
+    .event-dots {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2px;
+      width: 100%;
     }
 
-    .matrix-cell.active-day .event-indicator {
-      background: var(--accent);
+    .event-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--text);
     }
 
-    .cal-schedule {
-      border-top: 1px solid var(--panel-border);
-      padding-top: 20px;
+    /* Week View */
+    .cal-week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .week-day-col {
+      border: 1px solid var(--panel-border);
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      min-height: 240px;
+      cursor: pointer;
     }
 
-    .cal-label {
-      font-size: 0.8rem;
-      color: var(--muted);
+    .week-day-col.is-selected {
+      border-color: var(--text);
     }
 
-    .note-sheet {
-      width: 100%;
-      height: 440px;
-      background: transparent;
+    .week-day-header {
+      padding: 6px;
+      border-bottom: 1px solid var(--panel-border);
+      font-size: 0.75rem;
+      text-align: center;
+      color: var(--text-dim);
+    }
+
+    .week-day-header.today {
+      color: var(--text);
+      font-weight: bold;
+    }
+
+    .week-day-events {
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow-y: auto;
+      max-height: 220px;
+    }
+
+    .event-pill {
+      font-size: 0.68rem;
+      border-left: 2px solid;
+      padding: 2px 4px;
+      background: #0a0a0a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Day / Hour View */
+    .cal-day-hours {
+      display: flex;
+      flex-direction: column;
       border: 1px solid var(--panel-border);
+      max-height: 460px;
+      overflow-y: auto;
+    }
+
+    .hour-row {
+      display: flex;
+      min-height: 40px;
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .hour-label {
+      width: 68px;
+      padding: 8px 6px;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      border-right: 1px solid var(--panel-border);
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    .hour-content {
+      flex: 1;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .hour-content:hover {
+      background: #080808;
+    }
+
+    /* Direct Schedule Box in Calendar View */
+    .cal-action-box {
+      border-top: 1px solid var(--panel-border);
+      padding-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .cal-selected-info {
+      font-size: 0.82rem;
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Sticky Notes Workspace */
+    .notes-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 12px;
+    }
+
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .sticky-note {
+      border: 1px solid var(--panel-border);
+      background: #000000;
+      display: flex;
+      flex-direction: column;
+      height: 220px;
+      padding: 12px;
+      gap: 8px;
+      transition: border-color 0.15s ease;
+      position: relative;
+    }
+
+    .sticky-note:focus-within {
+      border-color: var(--text);
+    }
+
+    .sticky-note-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sticky-title {
+      background: transparent;
+      border: none;
       outline: none;
       color: var(--text);
       font-family: inherit;
-      font-size: 0.9rem;
-      line-height: 1.6;
-      padding: 16px;
-      resize: vertical;
+      font-size: 0.86rem;
+      font-weight: 500;
+      width: 85%;
     }
 
-    .note-sheet:focus {
-      border-color: var(--muted);
+    .sticky-body {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      resize: none;
+      flex: 1;
     }
 
-    .note-footer {
+    .sticky-footer {
       display: flex;
       justify-content: space-between;
-      font-size: 0.75rem;
-      color: var(--dim);
+      align-items: center;
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      border-top: 1px solid var(--panel-border);
+      padding-top: 6px;
     }
 
-    .notification-banner {
-      display: none;
-      font-size: 0.75rem;
-      color: #94a3b8;
-      border: 1px solid var(--panel-border);
-      padding: 8px 12px;
-      margin-bottom: 4px;
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .cal-week-grid {
+        grid-template-columns: 1fr;
+      }
+      .week-day-col {
+        min-height: 90px;
+      }
+      .task-creator-box {
+        flex-direction: column;
+      }
+      .date-input-wrap {
+        border-left: none;
+        padding-left: 0;
+      }
     }
   </style>
 </head>
@@ -380,7 +857,7 @@
             <span id="sync-status">connecting</span>
           </span>
           <span>|</span>
-          <span id="account-id-label" class="uid-tag" title="Click to copy full user ID">account: connecting...</span>
+          <span id="account-id-label" class="uid-tag" title="Click to copy account ID">account: connecting...</span>
         </div>
       </div>
       <nav class="nav-tabs">
@@ -390,53 +867,145 @@
       </nav>
     </header>
 
-    <div id="status-banner" class="notification-banner"></div>
-
-    <!-- 1. Tasks Panel -->
-    <main id="tasks" class="view-panel active">
-      <div class="input-row">
-        <input type="text" id="task-input" class="minimal-input" placeholder="type a task and press enter..." autocomplete="off">
+    <!-- Discreet OLED Focus / Pomodoro Timer with Custom Length Option -->
+    <div class="focus-bar">
+      <div class="focus-cluster">
+        <span class="focus-label">FOCUS</span>
+        <span class="timer-display" id="timer-display">25:00</span>
+        <button class="timer-btn" id="timer-toggle-btn" onclick="toggleFocusTimer()">start</button>
+        <button class="timer-btn" onclick="resetFocusTimer()">reset</button>
+        <div style="display: flex; gap: 4px; align-items: center;">
+          <button class="timer-mode-btn active" id="mode-25" onclick="setTimerDuration(25)">25m</button>
+          <button class="timer-mode-btn" id="mode-5" onclick="setTimerDuration(5)">5m</button>
+          <button class="timer-mode-btn" id="mode-15" onclick="setTimerDuration(15)">15m</button>
+          <div class="custom-timer-wrap">
+            <input type="number" id="custom-timer-input" class="custom-timer-input" min="1" max="480" placeholder="mins" autocomplete="off" onkeydown="if(event.key==='Enter')applyCustomTimer()" onblur="if(this.value)applyCustomTimer()">
+            <button class="timer-btn" style="padding: 2px 6px; font-size: 0.72rem;" onclick="applyCustomTimer()">set</button>
+          </div>
+        </div>
       </div>
+      <div class="focus-target-task" id="focus-task-info" title="Click ⏱ on any task to bind focus timer">
+        <span>working on:</span>
+        <span class="active-task-name" id="focus-task-name">none</span>
+        <button class="action-btn" id="focus-clear-btn" style="display: none; font-size: 0.75rem;" onclick="clearFocusTask()">×</button>
+      </div>
+    </div>
+
+    <!-- Notification / Action banner -->
+    <div class="toast-banner" id="toast-banner"></div>
+
+    <!-- 1. TASKS PANEL -->
+    <main id="tasks" class="view-panel active">
+      <!-- Sub-lists / Folders -->
+      <div class="sublists-bar">
+        <div id="sublists-container" style="display: flex; gap: 8px;"></div>
+        <div class="new-list-form">
+          <input type="text" id="new-list-input" class="new-list-input" placeholder="+ new list..." autocomplete="off">
+        </div>
+      </div>
+
+      <!-- Task Creator Form with Due Date/Time & Recurring -->
+      <div class="task-creator-box">
+        <input type="text" id="task-text-input" class="minimal-input" placeholder="what needs to be done?" autocomplete="off">
+        <div class="date-input-wrap">
+          <input type="datetime-local" id="task-date-input" class="date-picker-dark" title="Due date and time">
+          
+          <select id="task-repeat-input" class="date-picker-dark" title="Set recurring frequency">
+            <option value="none">repeat: off</option>
+            <option value="daily">daily</option>
+            <option value="weekly">weekly</option>
+            <option value="monthly">monthly</option>
+          </select>
+
+          <button class="btn-add" onclick="addTaskFromInput()">+ add</button>
+        </div>
+      </div>
+
+      <!-- Urgency Scale Indicator -->
+      <div class="urgency-legend">
+        <span>urgency:</span>
+        <div class="rainbow-indicator"></div>
+        <span>white (no date) &rarr; purple (&gt;7d) &rarr; cyan/green &rarr; red (due)</span>
+      </div>
+
+      <!-- Tasks List -->
       <ul id="task-list" class="item-list"></ul>
     </main>
 
-    <!-- 2. Calendar Panel -->
+    <!-- 2. CALENDAR PANEL -->
     <section id="calendar" class="view-panel">
-      <div class="cal-controls">
-        <button class="cal-nav" onclick="offsetMonth(-1)">&lt;</button>
-        <span id="cal-month-name"></span>
-        <button class="cal-nav" onclick="offsetMonth(1)">&gt;</button>
-      </div>
-      <div class="cal-matrix" id="cal-matrix"></div>
-      
-      <div class="cal-schedule">
-        <div class="cal-label" id="cal-schedule-date">select a day</div>
-        <div class="input-row">
-          <input type="text" id="event-input" class="minimal-input" placeholder="add note/event for selected date..." autocomplete="off">
+      <div class="cal-header-bar">
+        <div class="cal-nav-group">
+          <button class="cal-nav-btn" onclick="calNavigate(-1)">&lt;</button>
+          <span id="cal-date-title" style="font-weight: 500;"></span>
+          <button class="cal-nav-btn" onclick="calNavigate(1)">&gt;</button>
+          <button class="cal-nav-btn" onclick="calGoToday()" style="font-size: 0.75rem;">today</button>
         </div>
-        <ul id="event-list" class="item-list"></ul>
+        
+        <div class="cal-view-modes">
+          <button class="mode-btn active" id="mode-btn-month" onclick="switchCalMode('month')">month</button>
+          <button class="mode-btn" id="mode-btn-week" onclick="switchCalMode('week')">week</button>
+          <button class="mode-btn" id="mode-btn-day" onclick="switchCalMode('day')">day / hour</button>
+        </div>
+      </div>
+
+      <!-- Views Container -->
+      <div id="cal-view-container"></div>
+
+      <!-- Selected Date Scheduler & Events with Recurring -->
+      <div class="cal-action-box">
+        <div class="cal-selected-info">
+          <span id="cal-selected-label">schedule for: none</span>
+          <span style="font-size: 0.74rem; color: var(--text-dim);">adds directly to to-do list</span>
+        </div>
+
+        <div class="task-creator-box" style="border: 1px solid var(--panel-border);">
+          <input type="text" id="cal-task-text" class="minimal-input" placeholder="schedule a task for this date..." autocomplete="off">
+          <div class="date-input-wrap">
+            <input type="time" id="cal-task-time" class="date-picker-dark" value="12:00">
+            <select id="cal-task-repeat" class="date-picker-dark" title="Set recurring frequency">
+              <option value="none">repeat: off</option>
+              <option value="daily">daily</option>
+              <option value="weekly">weekly</option>
+              <option value="monthly">monthly</option>
+            </select>
+            <button class="btn-add" onclick="addTaskFromCalendar()">+ schedule</button>
+          </div>
+        </div>
+
+        <ul id="cal-event-list" class="item-list"></ul>
       </div>
     </section>
 
-    <!-- 3. Notes Panel -->
+    <!-- 3. STICKY NOTES PANEL -->
     <section id="notes" class="view-panel">
-      <textarea id="note-text" class="note-sheet" placeholder="ink scratchpad..."></textarea>
-      <div class="note-footer">
-        <span id="note-count">0 words</span>
-        <span id="note-state">in-sync</span>
+      <div class="notes-controls">
+        <div style="font-size: 0.82rem;">sticky notes (<span id="notes-count-label">0</span>)</div>
+        <button class="btn-add" onclick="createStickyNote()">+ new sticky note</button>
       </div>
+
+      <div class="notes-grid" id="notes-grid"></div>
     </section>
   </div>
 
+  <!-- Cloud Sync & State Initialization -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    /* Global in-memory workspace state */
-    window.tasks = [];
-    window.calendarEvents = {};
-    window.notesContent = "";
+    window.workspace = {
+      todoLists: { "main": [] },
+      currentListId: "main",
+      stickyNotes: [
+        {
+          id: 'note-welcome',
+          title: 'welcome',
+          body: 'persistent ink notes. click ⏱ on any task to start your focus session.',
+          updatedAt: new Date().toLocaleDateString()
+        }
+      ]
+    };
 
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'oled-workspace';
     let db = null;
@@ -449,16 +1018,13 @@
     const syncIndicator = document.getElementById('sync-indicator');
     const syncStatus = document.getElementById('sync-status');
     const accountIdLabel = document.getElementById('account-id-label');
-    const noteText = document.getElementById('note-text');
-    const noteCount = document.getElementById('note-count');
-    const noteState = document.getElementById('note-state');
 
     function updateSyncBadge(state, label) {
       syncStatus.innerText = label;
       syncIndicator.className = 'sync-dot ' + (state === 'saved' ? 'synced' : (state === 'saving' ? 'saving' : ''));
     }
 
-    async function setupStorage() {
+    async function initStorage() {
       if (typeof __firebase_config === 'undefined') {
         syncStatus.innerText = 'offline session';
         accountIdLabel.innerText = 'guest session';
@@ -471,7 +1037,6 @@
         db = getFirestore(app);
         auth = getAuth(app);
 
-        // Authenticate with custom token if provided, otherwise anonymous
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
           await signInWithCustomToken(auth, __initial_auth_token);
         } else {
@@ -486,7 +1051,7 @@
 
         authUserId = user.uid;
         accountIdLabel.innerText = `id: ${authUserId}`;
-        accountIdLabel.title = `Full Account ID: ${authUserId} (click to copy)`;
+        accountIdLabel.title = `Account ID: ${authUserId} (click to copy)`;
         accountIdLabel.onclick = () => {
           const temp = document.createElement('input');
           temp.value = authUserId;
@@ -494,271 +1059,907 @@
           temp.select();
           document.execCommand('copy');
           document.body.removeChild(temp);
-          syncStatus.innerText = 'copied id!';
-          setTimeout(() => { syncStatus.innerText = 'synced'; }, 1500);
+          window.showToast('Account ID copied to clipboard');
         };
 
-        // Strict Path: /artifacts/{appId}/users/{userId}/{collectionName}/{documentId}
         userDocRef = doc(db, 'artifacts', appId, 'users', authUserId, 'workspace', 'state');
 
-        // Realtime sync listener with mandatory error callback
         onSnapshot(userDocRef, (snapshot) => {
           if (snapshot.exists()) {
             const data = snapshot.data();
             isRemoteUpdate = true;
-            window.tasks = Array.isArray(data.tasks) ? data.tasks : [];
-            window.calendarEvents = typeof data.calendarEvents === 'object' && data.calendarEvents !== null ? data.calendarEvents : {};
-            window.notesContent = typeof data.notesContent === 'string' ? data.notesContent : "";
-            
-            if (document.activeElement !== noteText) {
-              noteText.value = window.notesContent;
-              updateNoteWordCount();
+
+            if (data.todoLists && typeof data.todoLists === 'object') {
+              window.workspace.todoLists = data.todoLists;
+            } else if (Array.isArray(data.tasks)) {
+              window.workspace.todoLists = { "main": data.tasks };
             }
 
+            if (!window.workspace.todoLists[window.workspace.currentListId]) {
+              window.workspace.currentListId = Object.keys(window.workspace.todoLists)[0] || "main";
+            }
+
+            if (Array.isArray(data.stickyNotes)) {
+              window.workspace.stickyNotes = data.stickyNotes;
+            }
+
+            window.renderSublists();
             window.renderTasks();
-            window.renderCalendar();
+            window.renderCalendarView();
+            window.renderStickyNotes();
+
             isRemoteUpdate = false;
             updateSyncBadge('saved', 'synced');
           } else {
-            // First time initialization
-            triggerPersist(true);
+            window.persistWorkspace(true);
             updateSyncBadge('saved', 'synced');
           }
-        }, (error) => {
-          console.error("Snapshot error:", error);
+        }, (err) => {
+          console.error("Firestore snapshot error:", err);
           updateSyncBadge('error', 'sync error');
         });
 
       } catch (err) {
-        console.error("Firebase auth/init error:", err);
+        console.error("Storage error:", err);
         updateSyncBadge('error', 'offline mode');
       }
     }
 
-    window.triggerPersist = function(immediate = false) {
+    window.persistWorkspace = function(immediate = false) {
       if (!userDocRef || isRemoteUpdate) return;
-
       updateSyncBadge('saving', 'saving...');
       clearTimeout(debounceSaveTimer);
 
       const doSave = async () => {
         try {
           await setDoc(userDocRef, {
-            tasks: window.tasks,
-            calendarEvents: window.calendarEvents,
-            notesContent: window.notesContent,
+            todoLists: window.workspace.todoLists,
+            stickyNotes: window.workspace.stickyNotes,
             updatedAt: new Date().toISOString()
           });
           updateSyncBadge('saved', 'synced');
         } catch (err) {
-          console.error("Error saving document:", err);
+          console.error("Save error:", err);
           updateSyncBadge('error', 'save error');
         }
       };
 
-      if (immediate) {
-        doSave();
-      } else {
-        debounceSaveTimer = setTimeout(doSave, 500);
-      }
+      if (immediate) doSave();
+      else debounceSaveTimer = setTimeout(doSave, 400);
     };
 
-    function updateNoteWordCount() {
-      const words = noteText.value.trim() ? noteText.value.trim().split(/\s+/).length : 0;
-      noteCount.innerText = `${words} word${words === 1 ? '' : 's'}`;
-    }
-
-    // Notes auto-sync listener
-    noteText.addEventListener('input', () => {
-      window.notesContent = noteText.value;
-      noteState.innerText = 'typing...';
-      updateNoteWordCount();
-      window.triggerPersist(false);
-      setTimeout(() => {
-        noteState.innerText = 'in-sync';
-      }, 500);
-    });
-
-    setupStorage();
+    initStorage();
   </script>
 
+  <!-- Application Logic -->
   <script>
-    function navigate(viewName) {
+    // Tab Switching
+    function navigate(tabName) {
       document.querySelectorAll('.tab-btn').forEach(b => {
-        b.classList.toggle('active', b.innerText === viewName);
+        b.classList.toggle('active', b.innerText === tabName);
       });
       document.querySelectorAll('.view-panel').forEach(p => {
-        p.classList.toggle('active', p.id === viewName);
+        p.classList.toggle('active', p.id === tabName);
       });
-      if (viewName === 'calendar') renderCalendar();
+      if (tabName === 'calendar') renderCalendarView();
+      if (tabName === 'notes') renderStickyNotes();
     }
 
-    // Tasks Management
-    const taskInput = document.getElementById('task-input');
+    // Discreet Toast System
+    let toastTimeout = null;
+    window.showToast = function(msg) {
+      const banner = document.getElementById('toast-banner');
+      banner.innerText = msg;
+      banner.style.display = 'block';
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        banner.style.display = 'none';
+      }, 3500);
+    };
+
+    // ==========================================
+    // FOCUS / POMODORO TIMER ENGINE
+    // ==========================================
+    let timerTotalSeconds = 25 * 60;
+    let timerRemainingSeconds = 25 * 60;
+    let timerInterval = null;
+    let isTimerRunning = false;
+    let activeFocusTask = null; // { id, text, listId }
+
+    const timerDisplay = document.getElementById('timer-display');
+    const timerToggleBtn = document.getElementById('timer-toggle-btn');
+    const focusTaskName = document.getElementById('focus-task-name');
+    const focusClearBtn = document.getElementById('focus-clear-btn');
+    const customTimerInput = document.getElementById('custom-timer-input');
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(timerRemainingSeconds / 60);
+      const secs = timerRemainingSeconds % 60;
+      timerDisplay.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function toggleFocusTimer() {
+      if (isTimerRunning) {
+        pauseFocusTimer();
+      } else {
+        startFocusTimer();
+      }
+    }
+
+    function startFocusTimer() {
+      if (timerRemainingSeconds <= 0) return;
+      isTimerRunning = true;
+      timerToggleBtn.innerText = 'pause';
+      
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timerRemainingSeconds--;
+        updateTimerDisplay();
+
+        if (timerRemainingSeconds <= 0) {
+          clearInterval(timerInterval);
+          isTimerRunning = false;
+          timerToggleBtn.innerText = 'start';
+          playChime();
+          onFocusSessionComplete();
+        }
+      }, 1000);
+    }
+
+    function pauseFocusTimer() {
+      isTimerRunning = false;
+      clearInterval(timerInterval);
+      timerToggleBtn.innerText = 'resume';
+    }
+
+    function resetFocusTimer() {
+      isTimerRunning = false;
+      clearInterval(timerInterval);
+      timerRemainingSeconds = timerTotalSeconds;
+      timerToggleBtn.innerText = 'start';
+      updateTimerDisplay();
+    }
+
+    function setTimerDuration(mins) {
+      if (customTimerInput) customTimerInput.value = '';
+      document.querySelectorAll('.timer-mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.id === `mode-${mins}`);
+      });
+      timerTotalSeconds = mins * 60;
+      timerRemainingSeconds = timerTotalSeconds;
+      resetFocusTimer();
+    }
+
+    function applyCustomTimer() {
+      const val = parseInt(customTimerInput.value, 10);
+      if (isNaN(val) || val <= 0) {
+        showToast('enter a valid positive number of minutes');
+        return;
+      }
+      document.querySelectorAll('.timer-mode-btn').forEach(btn => btn.classList.remove('active'));
+      timerTotalSeconds = val * 60;
+      timerRemainingSeconds = timerTotalSeconds;
+      resetFocusTimer();
+      showToast(`timer set to ${val} minute${val === 1 ? '' : 's'}`);
+    }
+
+    function setFocusTask(id, text, listId) {
+      activeFocusTask = { id, text, listId };
+      focusTaskName.innerText = text;
+      focusClearBtn.style.display = 'inline-block';
+      showToast(`focus target: "${text}"`);
+    }
+
+    function clearFocusTask() {
+      activeFocusTask = null;
+      focusTaskName.innerText = 'none';
+      focusClearBtn.style.display = 'none';
+    }
+
+    function onFocusSessionComplete() {
+      if (activeFocusTask) {
+        const list = window.workspace.todoLists[activeFocusTask.listId];
+        if (list) {
+          const task = list.find(t => t.id === activeFocusTask.id);
+          if (task) {
+            task.pomodoros = (task.pomodoros || 0) + 1;
+            renderTasks();
+            window.persistWorkspace();
+            showToast(`session completed for "${task.text}" (pomodoros: ${task.pomodoros})`);
+            return;
+          }
+        }
+      }
+      showToast('focus session completed!');
+    }
+
+    // Web Audio Synthesized Chime
+    function playChime() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.6);
+
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.6);
+      } catch (e) {}
+    }
+
+    // Dynamic Urgency Color Calculation: White -> Purple -> Rainbow -> Red
+    function getUrgencyInfo(dueISO) {
+      if (!dueISO) {
+        return { color: '#ffffff', label: '', isOverdue: false };
+      }
+
+      const due = new Date(dueISO).getTime();
+      const now = Date.now();
+      const diffMs = due - now;
+      const diffHours = diffMs / (1000 * 60 * 60);
+
+      const dateObj = new Date(dueISO);
+      const timeStr = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + 
+                      dateObj.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+
+      if (diffMs < 0) {
+        const pastHours = Math.abs(Math.round(diffHours));
+        const overdueText = pastHours < 24 ? `${pastHours}h overdue` : `${Math.round(pastHours/24)}d overdue`;
+        return { color: '#ef4444', label: `due ${timeStr} (${overdueText})`, isOverdue: true };
+      }
+
+      if (diffHours <= 6) {
+        return { color: '#ef4444', label: `due ${timeStr} (<${Math.max(1, Math.round(diffHours))}h left)`, isOverdue: false };
+      } else if (diffHours <= 24) {
+        return { color: '#f97316', label: `due ${timeStr} (~${Math.round(diffHours)}h left)`, isOverdue: false };
+      } else if (diffHours <= 48) {
+        return { color: '#eab308', label: `due ${timeStr} (in 1-2 days)`, isOverdue: false };
+      } else if (diffHours <= 72) {
+        return { color: '#22c55e', label: `due ${timeStr} (in 3 days)`, isOverdue: false };
+      } else if (diffHours <= 120) {
+        return { color: '#06b6d4', label: `due ${timeStr} (in 4-5 days)`, isOverdue: false };
+      } else if (diffHours <= 168) {
+        return { color: '#3b82f6', label: `due ${timeStr} (in ~1 week)`, isOverdue: false };
+      } else {
+        return { color: '#a855f7', label: `due ${timeStr}`, isOverdue: false };
+      }
+    }
+
+    function getAllTasksWithDue() {
+      const lists = window.workspace.todoLists || {};
+      const result = [];
+      Object.keys(lists).forEach(listId => {
+        (lists[listId] || []).forEach(task => {
+          if (task.dueDate) {
+            result.push({ ...task, listId });
+          }
+        });
+      });
+      return result;
+    }
+
+    // Sub-lists Management
+    const sublistsContainer = document.getElementById('sublists-container');
+    const newListInput = document.getElementById('new-list-input');
+    const taskTextInput = document.getElementById('task-text-input');
+    const taskDateInput = document.getElementById('task-date-input');
+    const taskRepeatInput = document.getElementById('task-repeat-input');
     const taskList = document.getElementById('task-list');
 
+    window.renderSublists = function() {
+      sublistsContainer.innerHTML = '';
+      const lists = window.workspace.todoLists;
+      if (!lists || Object.keys(lists).length === 0) {
+        window.workspace.todoLists = { "main": [] };
+        window.workspace.currentListId = "main";
+      }
+
+      Object.keys(window.workspace.todoLists).forEach(name => {
+        const chip = document.createElement('div');
+        chip.className = 'sublist-chip' + (name === window.workspace.currentListId ? ' active' : '');
+        const count = (window.workspace.todoLists[name] || []).filter(t => !t.done).length;
+        
+        chip.innerHTML = `
+          <span onclick="switchSublist('${escapeJsString(name)}')">${escapeMarkup(name)} (${count})</span>
+          ${name !== 'main' ? `<span class="chip-del" onclick="deleteSublist('${escapeJsString(name)}', event)">×</span>` : ''}
+        `;
+        sublistsContainer.appendChild(chip);
+      });
+
+      taskTextInput.placeholder = `add task to [${window.workspace.currentListId}]...`;
+    };
+
+    window.switchSublist = function(name) {
+      window.workspace.currentListId = name;
+      renderSublists();
+      renderTasks();
+    };
+
+    window.deleteSublist = function(name, evt) {
+      evt.stopPropagation();
+      delete window.workspace.todoLists[name];
+      if (window.workspace.currentListId === name) {
+        window.workspace.currentListId = Object.keys(window.workspace.todoLists)[0] || "main";
+      }
+      renderSublists();
+      renderTasks();
+      renderCalendarView();
+      window.persistWorkspace();
+      showToast(`list "${name}" deleted`);
+    };
+
+    newListInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const val = newListInput.value.trim().toLowerCase();
+        if (val && !window.workspace.todoLists[val]) {
+          window.workspace.todoLists[val] = [];
+          window.workspace.currentListId = val;
+          newListInput.value = '';
+          renderSublists();
+          renderTasks();
+          window.persistWorkspace();
+        }
+      }
+    });
+
+    // Task Rendering & Recurring Logic
     window.renderTasks = function() {
       taskList.innerHTML = '';
-      (window.tasks || []).forEach((t, i) => {
+      const list = window.workspace.todoLists[window.workspace.currentListId] || [];
+
+      const sorted = [...list].map((item, originalIdx) => ({ item, originalIdx }));
+      sorted.sort((a, b) => {
+        if (a.item.done !== b.item.done) return a.item.done ? 1 : -1;
+        if (a.item.dueDate && b.item.dueDate) return new Date(a.item.dueDate) - new Date(b.item.dueDate);
+        if (a.item.dueDate) return -1;
+        if (b.item.dueDate) return 1;
+        return 0;
+      });
+
+      if (sorted.length === 0) {
+        const li = document.createElement('li');
+        li.style.color = 'var(--text-faint)';
+        li.style.fontSize = '0.85rem';
+        li.style.padding = '12px 0';
+        li.innerText = 'no tasks in this list yet.';
+        taskList.appendChild(li);
+        return;
+      }
+
+      sorted.forEach(({ item, originalIdx }) => {
+        const urgency = getUrgencyInfo(item.dueDate);
         const li = document.createElement('li');
         li.className = 'item-row';
+        li.style.borderLeft = item.dueDate ? `3px solid ${urgency.color}` : '1px solid var(--panel-border)';
+
+        const isBoundToTimer = activeFocusTask && activeFocusTask.id === item.id;
+
         li.innerHTML = `
           <label class="item-label">
-            <input type="checkbox" class="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})">
-            <span class="item-text">${escapeMarkup(t.text)}</span>
+            <input type="checkbox" class="checkbox" ${item.done ? 'checked' : ''} onchange="toggleTask(${originalIdx})">
+            <div class="item-content">
+              <span class="item-text" style="color: ${item.done ? '#666666' : urgency.color};">
+                ${escapeMarkup(item.text)}
+              </span>
+              <div class="badges-row">
+                ${urgency.label ? `<span class="due-badge" style="color: ${urgency.color};">&#9679; ${urgency.label}</span>` : ''}
+                ${item.repeat && item.repeat !== 'none' ? `<span class="repeat-badge">&#8635; ${item.repeat}${item.streak ? ` (${item.streak})` : ''}</span>` : ''}
+                ${item.pomodoros ? `<span class="pomodoro-badge">&#9201; ${item.pomodoros}</span>` : ''}
+              </div>
+            </div>
           </label>
-          <button class="action-btn" onclick="removeTask(${i})">×</button>
+          <div class="row-actions">
+            <button class="action-btn" title="Focus Timer" style="${isBoundToTimer ? 'color: #22c55e;' : ''}" 
+              onclick="setFocusTask('${item.id}', '${escapeJsString(item.text)}', '${window.workspace.currentListId}')">&#9201;</button>
+            <button class="action-btn" onclick="removeTask(${originalIdx})">×</button>
+          </div>
         `;
         taskList.appendChild(li);
       });
     };
 
     window.toggleTask = function(index) {
-      if (!window.tasks[index]) return;
-      window.tasks[index].done = !window.tasks[index].done;
+      const items = window.workspace.todoLists[window.workspace.currentListId];
+      if (!items || !items[index]) return;
+      const task = items[index];
+
+      if (!task.done && task.repeat && task.repeat !== 'none') {
+        let baseDate = task.dueDate ? new Date(task.dueDate) : new Date();
+        const now = new Date();
+
+        if (baseDate < now) {
+          const origHour = baseDate.getHours();
+          const origMin = baseDate.getMinutes();
+          baseDate = new Date();
+          baseDate.setHours(origHour, origMin, 0, 0);
+        }
+
+        if (task.repeat === 'daily') {
+          baseDate.setDate(baseDate.getDate() + 1);
+        } else if (task.repeat === 'weekly') {
+          baseDate.setDate(baseDate.getDate() + 7);
+        } else if (task.repeat === 'monthly') {
+          baseDate.setMonth(baseDate.getMonth() + 1);
+        }
+
+        task.streak = (task.streak || 0) + 1;
+        task.dueDate = baseDate.toISOString();
+        task.done = false;
+
+        showToast(`recurring ${task.repeat}: advanced to ${baseDate.toLocaleDateString()} (cycle: ${task.streak})`);
+      } else {
+        task.done = !task.done;
+      }
+
       renderTasks();
-      window.triggerPersist();
+      renderSublists();
+      renderCalendarView();
+      window.persistWorkspace();
     };
 
     window.removeTask = function(index) {
-      window.tasks.splice(index, 1);
+      const items = window.workspace.todoLists[window.workspace.currentListId];
+      if (!items) return;
+      if (activeFocusTask && items[index] && activeFocusTask.id === items[index].id) {
+        clearFocusTask();
+      }
+      items.splice(index, 1);
       renderTasks();
-      window.triggerPersist();
+      renderSublists();
+      renderCalendarView();
+      window.persistWorkspace();
     };
 
-    taskInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && taskInput.value.trim()) {
-        window.tasks.unshift({ text: taskInput.value.trim(), done: false });
-        taskInput.value = '';
-        renderTasks();
-        window.triggerPersist();
+    function addTaskFromInput() {
+      const text = taskTextInput.value.trim();
+      if (!text) return;
+      const dueDate = taskDateInput.value ? new Date(taskDateInput.value).toISOString() : null;
+      const repeat = taskRepeatInput.value || 'none';
+
+      if (!window.workspace.todoLists[window.workspace.currentListId]) {
+        window.workspace.todoLists[window.workspace.currentListId] = [];
       }
+
+      window.workspace.todoLists[window.workspace.currentListId].unshift({
+        id: 't-' + Date.now(),
+        text,
+        dueDate,
+        repeat,
+        streak: 0,
+        pomodoros: 0,
+        done: false,
+        createdAt: new Date().toISOString()
+      });
+
+      taskTextInput.value = '';
+      taskDateInput.value = '';
+      taskRepeatInput.value = 'none';
+
+      renderTasks();
+      renderSublists();
+      renderCalendarView();
+      window.persistWorkspace();
+    }
+
+    taskTextInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addTaskFromInput();
     });
 
-    // Calendar Management
-    let activeCalDate = new Date();
-    let currentSelectedDateKey = dateToKey(new Date());
+    // ==========================================
+    // CALENDAR SYSTEM (Month, Week, Day/Hour)
+    // ==========================================
+    let calMode = 'month';
+    let calCurrentDate = new Date();
+    let calSelectedDate = new Date();
 
-    const calMatrix = document.getElementById('cal-matrix');
-    const calMonthName = document.getElementById('cal-month-name');
-    const calScheduleDate = document.getElementById('cal-schedule-date');
-    const eventInput = document.getElementById('event-input');
-    const eventList = document.getElementById('event-list');
+    const calTitle = document.getElementById('cal-date-title');
+    const calViewContainer = document.getElementById('cal-view-container');
+    const calSelectedLabel = document.getElementById('cal-selected-label');
+    const calTaskText = document.getElementById('cal-task-text');
+    const calTaskTime = document.getElementById('cal-task-time');
+    const calTaskRepeat = document.getElementById('cal-task-repeat');
+    const calEventList = document.getElementById('cal-event-list');
 
-    function dateToKey(dateObj) {
-      const y = dateObj.getFullYear();
-      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const d = String(dateObj.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+    function dateToYMD(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     }
 
-    function offsetMonth(offset) {
-      activeCalDate.setMonth(activeCalDate.getMonth() + offset);
-      renderCalendar();
+    function switchCalMode(mode) {
+      calMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => {
+        b.classList.toggle('active', b.id === `mode-${mode}`);
+      });
+      renderCalendarView();
     }
 
-    window.renderCalendar = function() {
-      calMatrix.innerHTML = '';
-      const year = activeCalDate.getFullYear();
-      const month = activeCalDate.getMonth();
+    function calGoToday() {
+      calCurrentDate = new Date();
+      calSelectedDate = new Date();
+      renderCalendarView();
+    }
 
+    function calNavigate(delta) {
+      if (calMode === 'month') {
+        calCurrentDate.setMonth(calCurrentDate.getMonth() + delta);
+      } else if (calMode === 'week') {
+        calCurrentDate.setDate(calCurrentDate.getDate() + (delta * 7));
+      } else if (calMode === 'day') {
+        calCurrentDate.setDate(calCurrentDate.getDate() + delta);
+        calSelectedDate = new Date(calCurrentDate);
+      }
+      renderCalendarView();
+    }
+
+    function selectDate(dateObj) {
+      calSelectedDate = new Date(dateObj);
+      renderCalendarView();
+    }
+
+    function getTasksForDate(dateObj) {
+      const ymd = dateToYMD(dateObj);
+      const all = getAllTasksWithDue();
+      return all.filter(t => t.dueDate && dateToYMD(new Date(t.dueDate)) === ymd);
+    }
+
+    window.renderCalendarView = function() {
+      calViewContainer.innerHTML = '';
+
+      if (calMode === 'month') renderMonthGrid();
+      else if (calMode === 'week') renderWeekGrid();
+      else if (calMode === 'day') renderDayHourGrid();
+
+      renderSelectedDayEvents();
+    };
+
+    function renderMonthGrid() {
+      const year = calCurrentDate.getFullYear();
+      const month = calCurrentDate.getMonth();
       const months = ['january', 'february', 'march', 'april', 'may', 'june', 
                       'july', 'august', 'september', 'october', 'november', 'december'];
-      calMonthName.innerText = `${months[month]} ${year}`;
+      calTitle.innerText = `${months[month]} ${year}`;
 
-      const weekdayNames = ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'];
-      weekdayNames.forEach(name => {
-        const col = document.createElement('div');
-        col.className = 'matrix-head';
-        col.innerText = name;
-        calMatrix.appendChild(col);
+      const grid = document.createElement('div');
+      grid.className = 'cal-grid-month';
+
+      const weekdays = ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'];
+      weekdays.forEach(w => {
+        const h = document.createElement('div');
+        h.className = 'cal-head-cell';
+        h.innerText = w;
+        grid.appendChild(h);
       });
 
-      const firstDayDayOfWeek = new Date(year, month, 1).getDay();
-      const daysCountInMonth = new Date(year, month + 1, 0).getDate();
-      const todayKey = dateToKey(new Date());
+      const firstDay = new Date(year, month, 1).getDay();
+      const totalDays = new Date(year, month + 1, 0).getDate();
+      const todayYMD = dateToYMD(new Date());
+      const selectedYMD = dateToYMD(calSelectedDate);
 
-      for (let i = 0; i < firstDayDayOfWeek; i++) {
-        const emptyCell = document.createElement('div');
-        emptyCell.className = 'matrix-cell empty';
-        calMatrix.appendChild(emptyCell);
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'cal-cell is-empty';
+        grid.appendChild(empty);
       }
 
-      const eventsMap = window.calendarEvents || {};
+      for (let d = 1; d <= totalDays; d++) {
+        const currentCellDate = new Date(year, month, d);
+        const cellYMD = dateToYMD(currentCellDate);
+        const tasks = getTasksForDate(currentCellDate);
 
-      for (let day = 1; day <= daysCountInMonth; day++) {
         const cell = document.createElement('div');
-        cell.className = 'matrix-cell';
-        const dayKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        cell.className = 'cal-cell';
+        if (cellYMD === todayYMD) cell.classList.add('is-today');
+        if (cellYMD === selectedYMD) cell.classList.add('is-selected');
 
-        if (dayKey === todayKey) cell.classList.add('is-today');
-        if (dayKey === currentSelectedDateKey) cell.classList.add('active-day');
+        const dayNum = document.createElement('span');
+        dayNum.className = 'day-number';
+        dayNum.innerText = d;
+        cell.appendChild(dayNum);
 
-        cell.innerText = day;
-
-        if (eventsMap[dayKey] && eventsMap[dayKey].length > 0) {
-          const marker = document.createElement('div');
-          marker.className = 'event-indicator';
-          cell.appendChild(marker);
+        if (tasks.length > 0) {
+          const dots = document.createElement('div');
+          dots.className = 'event-dots';
+          tasks.slice(0, 4).forEach(t => {
+            const dot = document.createElement('div');
+            dot.className = 'event-dot';
+            dot.style.background = t.done ? '#444' : getUrgencyInfo(t.dueDate).color;
+            dots.appendChild(dot);
+          });
+          cell.appendChild(dots);
         }
 
-        cell.onclick = () => {
-          currentSelectedDateKey = dayKey;
-          renderCalendar();
-          renderSchedule();
+        cell.onclick = () => selectDate(currentCellDate);
+        grid.appendChild(cell);
+      }
+
+      calViewContainer.appendChild(grid);
+    }
+
+    function renderWeekGrid() {
+      const curr = new Date(calCurrentDate);
+      const dayOfWeek = curr.getDay();
+      const startOfWeek = new Date(curr.setDate(curr.getDate() - dayOfWeek));
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(endOfWeek.getDate() + 6);
+
+      calTitle.innerText = `${startOfWeek.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} — ${endOfWeek.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+
+      const weekWrap = document.createElement('div');
+      weekWrap.className = 'cal-week-grid';
+
+      const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const todayYMD = dateToYMD(new Date());
+      const selectedYMD = dateToYMD(calSelectedDate);
+
+      for (let i = 0; i < 7; i++) {
+        const dayDate = new Date(startOfWeek);
+        dayDate.setDate(dayDate.getDate() + i);
+        const dayYMD = dateToYMD(dayDate);
+        const tasks = getTasksForDate(dayDate);
+
+        const col = document.createElement('div');
+        col.className = 'week-day-col' + (dayYMD === selectedYMD ? ' is-selected' : '');
+        col.onclick = () => selectDate(dayDate);
+
+        const header = document.createElement('div');
+        header.className = 'week-day-header' + (dayYMD === todayYMD ? ' today' : '');
+        header.innerText = `${weekdays[i]} ${dayDate.getDate()}`;
+        col.appendChild(header);
+
+        const eventsBox = document.createElement('div');
+        eventsBox.className = 'week-day-events';
+
+        tasks.forEach(t => {
+          const pill = document.createElement('div');
+          pill.className = 'event-pill';
+          const urgency = getUrgencyInfo(t.dueDate);
+          pill.style.borderLeftColor = t.done ? '#555' : urgency.color;
+          pill.style.color = t.done ? '#666' : urgency.color;
+          const time = new Date(t.dueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          pill.innerText = `${time} ${t.text}`;
+          eventsBox.appendChild(pill);
+        });
+
+        col.appendChild(eventsBox);
+        weekWrap.appendChild(col);
+      }
+
+      calViewContainer.appendChild(weekWrap);
+    }
+
+    function renderDayHourGrid() {
+      const d = calSelectedDate;
+      calTitle.innerText = d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+      const dayContainer = document.createElement('div');
+      dayContainer.className = 'cal-day-hours';
+
+      const tasksForDay = getTasksForDate(d);
+
+      for (let hour = 0; hour < 24; hour++) {
+        const row = document.createElement('div');
+        row.className = 'hour-row';
+
+        const label = document.createElement('div');
+        label.className = 'hour-label';
+        label.innerText = String(hour).padStart(2, '0') + ':00';
+        row.appendChild(label);
+
+        const content = document.createElement('div');
+        content.className = 'hour-content';
+
+        const matchingTasks = tasksForDay.filter(t => new Date(t.dueDate).getHours() === hour);
+
+        matchingTasks.forEach(t => {
+          const urgency = getUrgencyInfo(t.dueDate);
+          const pill = document.createElement('div');
+          pill.className = 'event-pill';
+          pill.style.borderLeftColor = t.done ? '#444' : urgency.color;
+          pill.style.color = t.done ? '#666' : urgency.color;
+          pill.innerText = `${t.text} (${t.listId})`;
+          content.appendChild(pill);
+        });
+
+        content.onclick = () => {
+          calTaskTime.value = `${String(hour).padStart(2, '0')}:00`;
+          calTaskText.focus();
         };
 
-        calMatrix.appendChild(cell);
+        row.appendChild(content);
+        dayContainer.appendChild(row);
       }
-      renderSchedule();
-    };
 
-    function renderSchedule() {
-      calScheduleDate.innerText = currentSelectedDateKey ? `entries :: ${currentSelectedDateKey}` : 'select a day';
-      eventList.innerHTML = '';
-      const eventsMap = window.calendarEvents || {};
-      const entries = eventsMap[currentSelectedDateKey] || [];
-      entries.forEach((entry, idx) => {
+      calViewContainer.appendChild(dayContainer);
+    }
+
+    function renderSelectedDayEvents() {
+      calSelectedLabel.innerText = `schedule for: ${calSelectedDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}`;
+      calEventList.innerHTML = '';
+
+      const tasks = getTasksForDate(calSelectedDate);
+
+      if (tasks.length === 0) {
+        const empty = document.createElement('li');
+        empty.style.color = 'var(--text-faint)';
+        empty.style.fontSize = '0.82rem';
+        empty.style.padding = '8px 0';
+        empty.innerText = 'no tasks or events scheduled for this day.';
+        calEventList.appendChild(empty);
+        return;
+      }
+
+      tasks.forEach(t => {
+        const urgency = getUrgencyInfo(t.dueDate);
         const li = document.createElement('li');
         li.className = 'item-row';
+        li.style.borderLeft = `3px solid ${urgency.color}`;
+
+        const timeStr = new Date(t.dueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
         li.innerHTML = `
-          <span class="item-text">${escapeMarkup(entry)}</span>
-          <button class="action-btn" onclick="removeEvent('${currentSelectedDateKey}', ${idx})">×</button>
+          <div class="item-label" style="cursor: default;">
+            <div class="item-content">
+              <span class="item-text" style="color: ${t.done ? '#666' : urgency.color};">
+                ${escapeMarkup(t.text)}
+              </span>
+              <div class="badges-row">
+                <span class="due-badge" style="color: ${urgency.color};">
+                  ${timeStr} &bull; [${escapeMarkup(t.listId)}] ${t.done ? '(completed)' : ''}
+                </span>
+                ${t.repeat && t.repeat !== 'none' ? `<span class="repeat-badge">&#8635; ${t.repeat}</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <button class="action-btn" onclick="removeScheduledTask('${t.listId}', '${t.id}')">×</button>
         `;
-        eventList.appendChild(li);
+        calEventList.appendChild(li);
       });
     }
 
-    window.removeEvent = function(key, idx) {
-      if (window.calendarEvents && window.calendarEvents[key]) {
-        window.calendarEvents[key].splice(idx, 1);
-        if (window.calendarEvents[key].length === 0) delete window.calendarEvents[key];
-        renderCalendar();
-        window.triggerPersist();
+    function addTaskFromCalendar() {
+      const text = calTaskText.value.trim();
+      if (!text) return;
+      const timeVal = calTaskTime.value || '12:00';
+      const repeat = calTaskRepeat.value || 'none';
+      const [h, m] = timeVal.split(':');
+
+      const due = new Date(calSelectedDate);
+      due.setHours(parseInt(h, 10), parseInt(m, 10), 0, 0);
+
+      const targetList = window.workspace.currentListId || 'main';
+      if (!window.workspace.todoLists[targetList]) {
+        window.workspace.todoLists[targetList] = [];
+      }
+
+      window.workspace.todoLists[targetList].unshift({
+        id: 't-' + Date.now(),
+        text: text,
+        dueDate: due.toISOString(),
+        repeat: repeat,
+        streak: 0,
+        pomodoros: 0,
+        done: false,
+        createdAt: new Date().toISOString()
+      });
+
+      calTaskText.value = '';
+      calTaskRepeat.value = 'none';
+
+      renderTasks();
+      renderSublists();
+      renderCalendarView();
+      window.persistWorkspace();
+    }
+
+    window.removeScheduledTask = function(listId, taskId) {
+      const items = window.workspace.todoLists[listId];
+      if (!items) return;
+      const idx = items.findIndex(t => t.id === taskId);
+      if (idx !== -1) {
+        items.splice(idx, 1);
+        renderTasks();
+        renderSublists();
+        renderCalendarView();
+        window.persistWorkspace();
       }
     };
 
-    eventInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && eventInput.value.trim()) {
-        if (!currentSelectedDateKey) return;
-        if (!window.calendarEvents) window.calendarEvents = {};
-        if (!window.calendarEvents[currentSelectedDateKey]) {
-          window.calendarEvents[currentSelectedDateKey] = [];
-        }
-        window.calendarEvents[currentSelectedDateKey].push(eventInput.value.trim());
-        eventInput.value = '';
-        renderCalendar();
-        window.triggerPersist();
-      }
+    calTaskText.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addTaskFromCalendar();
     });
 
+    // ==========================================
+    // STICKY NOTES SYSTEM
+    // ==========================================
+    const notesGrid = document.getElementById('notes-grid');
+    const notesCountLabel = document.getElementById('notes-count-label');
+
+    window.renderStickyNotes = function() {
+      notesGrid.innerHTML = '';
+      const notes = window.workspace.stickyNotes || [];
+      notesCountLabel.innerText = notes.length;
+
+      notes.forEach((note, index) => {
+        const card = document.createElement('div');
+        card.className = 'sticky-note';
+
+        card.innerHTML = `
+          <div class="sticky-note-header">
+            <input type="text" class="sticky-title" value="${escapeMarkup(note.title || 'untitled')}" 
+              oninput="updateStickyTitle(${index}, this.value)" placeholder="title...">
+            <button class="action-btn" onclick="deleteStickyNote(${index})" title="Delete Note">×</button>
+          </div>
+          <textarea class="sticky-body" placeholder="write note here..." 
+            oninput="updateStickyBody(${index}, this.value)">${escapeMarkup(note.body || '')}</textarea>
+          <div class="sticky-footer">
+            <span>${note.updatedAt || 'just now'}</span>
+            <span>saved</span>
+          </div>
+        `;
+        notesGrid.appendChild(card);
+      });
+    };
+
+    window.createStickyNote = function() {
+      if (!window.workspace.stickyNotes) window.workspace.stickyNotes = [];
+      window.workspace.stickyNotes.unshift({
+        id: 'note-' + Date.now(),
+        title: '',
+        body: '',
+        updatedAt: new Date().toLocaleDateString()
+      });
+      renderStickyNotes();
+      window.persistWorkspace();
+    };
+
+    window.deleteStickyNote = function(index) {
+      window.workspace.stickyNotes.splice(index, 1);
+      renderStickyNotes();
+      window.persistWorkspace();
+      showToast('sticky note deleted');
+    };
+
+    window.updateStickyTitle = function(index, val) {
+      if (window.workspace.stickyNotes[index]) {
+        window.workspace.stickyNotes[index].title = val;
+        window.workspace.stickyNotes[index].updatedAt = new Date().toLocaleDateString();
+        window.persistWorkspace();
+      }
+    };
+
+    window.updateStickyBody = function(index, val) {
+      if (window.workspace.stickyNotes[index]) {
+        window.workspace.stickyNotes[index].body = val;
+        window.workspace.stickyNotes[index].updatedAt = new Date().toLocaleDateString();
+        window.persistWorkspace();
+      }
+    };
+
+    // Helpers
     function escapeMarkup(str) {
-      const el = document.createElement('div');
-      el.innerText = str;
-      return el.innerHTML;
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.innerText = str;
+      return div.innerHTML;
     }
 
-    // Initial first-paint render
+    function escapeJsString(str) {
+      return (str || '').replace(/'/g, "\\'");
+    }
+
+    // Initial render
+    renderSublists();
     renderTasks();
   </script>
 </body>
