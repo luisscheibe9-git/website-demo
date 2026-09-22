@@ -99,6 +99,192 @@
       display: inline-block;
     }
 
+    .brand-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .storage-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: inherit;
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s var(--ease);
+    }
+
+    .storage-btn:hover, .storage-btn.open {
+      color: var(--text);
+      border-color: var(--border-strong);
+    }
+
+    .storage-caret { font-size: 0.6rem; opacity: 0.7; }
+
+    .storage-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      z-index: 50;
+      width: min(360px, calc(100vw - 32px));
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .storage-panel.open { display: flex; }
+
+    .storage-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+
+    .storage-section:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .storage-section-title {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      font-weight: 600;
+      padding: 0 2px;
+    }
+
+    .storage-option {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: stretch;
+      text-align: left;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      cursor: pointer;
+      font-family: inherit;
+      color: var(--text);
+      transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+    }
+
+    .storage-option:hover { border-color: var(--border-strong); }
+
+    .storage-option.active {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .storage-option-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .storage-radio {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-strong);
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .storage-option.active .storage-radio {
+      border-color: var(--accent);
+    }
+
+    .storage-option.active .storage-radio::after {
+      content: "";
+      position: absolute;
+      inset: 2px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .storage-tag {
+      margin-left: auto;
+      font-size: 0.6rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      font-weight: 600;
+    }
+
+    .storage-option-desc {
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+      padding-left: 20px;
+    }
+
+    .cloud-setup {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+    }
+
+    .cloud-setup.open { display: flex; }
+
+    .cloud-setup-copy {
+      font-size: 0.74rem;
+      color: var(--text-dim);
+      line-height: 1.45;
+    }
+
+    .cloud-setup-copy a { color: var(--accent); }
+    .cloud-setup-copy code {
+      background: var(--surface-3);
+      padding: 1px 4px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+
+    .firebase-config-input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 0.72rem;
+      padding: 8px;
+      border-radius: var(--radius-sm);
+      min-height: 72px;
+      resize: vertical;
+      outline: none;
+    }
+
+    .firebase-config-input:focus { border-color: var(--accent); }
+
+    .cloud-setup-error {
+      font-size: 0.74rem;
+      color: var(--red);
+      display: none;
+    }
+
+    .cloud-setup-error.show { display: block; }
+
     .account-meta {
       font-size: 0.78rem;
       color: var(--text-dim);
@@ -952,9 +1138,67 @@
   <div class="container">
     <header>
       <div class="header-top">
-        <div class="brand"><span class="brand-dot"></span>True Black To Do</div>
+        <div class="brand-group">
+          <div class="brand"><span class="brand-dot"></span>True Black To Do</div>
+          <button class="storage-btn" id="storage-menu-btn" title="Choose how your data is saved">
+            <span id="storage-btn-label">this browser</span><span class="storage-caret">▾</span>
+          </button>
+
+          <div class="storage-panel" id="storage-panel">
+            <div class="storage-section">
+              <div class="storage-section-title">autosave destination</div>
+
+              <button class="storage-option active" id="storage-opt-local" data-backend="local">
+                <div class="storage-option-head">
+                  <span class="storage-radio"></span>
+                  <span>this browser</span>
+                  <span class="storage-tag">default</span>
+                </div>
+                <div class="storage-option-desc">Saves instantly with no setup. Fast and private, but stays only on this device and browser.</div>
+              </button>
+
+              <button class="storage-option" id="storage-opt-cloud" data-backend="cloud">
+                <div class="storage-option-head">
+                  <span class="storage-radio"></span>
+                  <span>cloud account</span>
+                  <span class="storage-tag">advanced</span>
+                </div>
+                <div class="storage-option-desc">Syncs across every device you sign into. Requires your own free Firebase project (~5 min one-time setup).</div>
+              </button>
+
+              <div id="cloud-setup" class="cloud-setup">
+                <div id="cloud-setup-disconnected">
+                  <p class="cloud-setup-copy">
+                    Paste the <code>firebaseConfig</code> object from your own
+                    <a href="https://console.firebase.google.com/" target="_blank" rel="noopener">Firebase console</a>
+                    (Project settings → your web app). Enable <strong>Firestore</strong> and the
+                    <strong>Google</strong> sign-in provider, and add this site's domain under
+                    Authentication → Settings → Authorized domains.
+                  </p>
+                  <textarea id="firebase-config-input" class="firebase-config-input" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "...", ...}'></textarea>
+                  <button class="btn-add" id="cloud-connect-btn">save config &amp; sign in with google</button>
+                  <p class="cloud-setup-error" id="cloud-setup-error"></p>
+                </div>
+                <div id="cloud-setup-connected" style="display: none;">
+                  <p class="cloud-setup-copy">signed in as <strong id="cloud-account-email">—</strong></p>
+                  <button class="timer-btn" id="cloud-signout-btn">sign out &amp; switch to this browser</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="storage-section">
+              <div class="storage-section-title">backup</div>
+              <div class="storage-option-desc" style="padding: 0 2px 8px;">Save a copy to a file on your computer, or load one back in. Works no matter which autosave option is active above.</div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="timer-btn" id="export-file-btn">&#8681; export to file</button>
+                <button class="timer-btn" id="import-file-btn">&#8679; import from file</button>
+                <input type="file" id="import-file-input" accept="application/json" style="display: none;">
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="account-meta">
-          <span class="sync-pill" title="Saved automatically to this browser">
+          <span class="sync-pill" title="Everything here is saved automatically in this browser as you type">
             <span id="sync-indicator" class="sync-dot"></span>
             <span id="sync-status">loading</span>
           </span>
@@ -1107,9 +1351,24 @@
       ]
     };
 
-    // Local persistence (browser localStorage — no account or server needed)
+    // Persistence — pluggable backend. "local" (default) uses this browser's
+    // localStorage with zero setup. "cloud" uses a Firebase project the user
+    // supplies themselves, so their data can follow them across devices.
     const STORAGE_KEY = 'oled-workspace:v1';
+    const BACKEND_KEY = 'oled-workspace:backend';
+    const FIREBASE_CONFIG_KEY = 'oled-workspace:firebase-config';
     let saveDebounceTimer = null;
+
+    let activeBackend = 'local';
+    let fb = null;              // loaded Firebase SDK functions, once connected
+    let cloudAuthObj = null;
+    let cloudDbObj = null;
+    let cloudUser = null;
+    let cloudUnsub = null;
+
+    function getSavedBackend() {
+      try { return localStorage.getItem(BACKEND_KEY) || 'local'; } catch (err) { return 'local'; }
+    }
 
     // DOM Elements
     const syncIndicator = document.getElementById('sync-indicator');
@@ -1126,8 +1385,8 @@
       syncIndicator.className = 'sync-dot ' + (state === 'saved' ? 'synced' : (state === 'saving' ? 'saving' : (state === 'error' ? 'error' : '')));
       syncPill.classList.toggle('state-error', state === 'error');
       syncPill.title = state === 'error'
-        ? 'Your changes could not be saved in this browser'
-        : 'Everything here is saved automatically in this browser as you type';
+        ? 'Your changes could not be saved'
+        : (activeBackend === 'cloud' ? 'Synced to your connected cloud account' : 'Saved automatically in this browser');
     }
 
     let toastTimeout = null;
@@ -1140,19 +1399,35 @@
       }, 3500);
     };
 
-    // Save the whole workspace to localStorage (debounced unless immediate=true)
+    // Save the whole workspace to whichever backend is active (debounced unless immediate=true)
     window.persistWorkspace = function(immediate = false) {
       updateSyncBadge('saving', 'saving…');
       clearTimeout(saveDebounceTimer);
 
-      const doSave = () => {
+      const doSave = async () => {
+        const payload = JSON.parse(JSON.stringify({
+          todoLists: window.workspace.todoLists || { "main": [] },
+          currentListId: window.workspace.currentListId || "main",
+          stickyNotes: window.workspace.stickyNotes || [],
+          updatedAt: new Date().toISOString()
+        }));
+
+        if (activeBackend === 'cloud') {
+          if (!cloudUser || !cloudDbObj || !fb) {
+            updateSyncBadge('error', '⚠ not saved — cloud account not connected');
+            return;
+          }
+          try {
+            await fb.setDoc(cloudDocRef(), payload);
+            updateSyncBadge('saved', `synced ✓ ${formatClockTime(new Date())}`);
+          } catch (err) {
+            console.error('Cloud save error:', err);
+            updateSyncBadge('error', '⚠ not saved — cloud write failed');
+          }
+          return;
+        }
+
         try {
-          const payload = JSON.parse(JSON.stringify({
-            todoLists: window.workspace.todoLists || { "main": [] },
-            currentListId: window.workspace.currentListId || "main",
-            stickyNotes: window.workspace.stickyNotes || [],
-            updatedAt: new Date().toISOString()
-          }));
           localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
           // Read the value straight back out of localStorage so "saved" only ever
           // reflects a write that the browser actually persisted, not just attempted.
@@ -1166,7 +1441,7 @@
       };
 
       if (immediate) {
-        doSave();
+        return doSave();
       } else {
         saveDebounceTimer = setTimeout(doSave, 350);
       }
@@ -1182,8 +1457,32 @@
       }
     });
 
-    // Load whatever was saved last time, if anything
-    function loadWorkspace() {
+    // Merge a loaded payload (from local storage, cloud, or an imported file) into the live workspace
+    function applyLoadedData(data) {
+      if (data.todoLists && typeof data.todoLists === 'object' && Object.keys(data.todoLists).length > 0) {
+        window.workspace.todoLists = data.todoLists;
+      }
+
+      if (data.currentListId && window.workspace.todoLists[data.currentListId]) {
+        window.workspace.currentListId = data.currentListId;
+      } else {
+        window.workspace.currentListId = Object.keys(window.workspace.todoLists)[0] || "main";
+      }
+
+      if (Array.isArray(data.stickyNotes)) {
+        window.workspace.stickyNotes = data.stickyNotes;
+      }
+    }
+
+    function rerenderAll() {
+      renderSublists();
+      renderTasks();
+      renderCalendarView();
+      renderStickyNotes();
+    }
+
+    // Load whatever was saved last time in THIS browser, if anything
+    function loadLocalWorkspace() {
       if (!isLocalStorageAvailable()) {
         updateSyncBadge('error', '⚠ storage blocked — nothing will save');
         return;
@@ -1196,20 +1495,7 @@
           return;
         }
         const data = JSON.parse(raw);
-
-        if (data.todoLists && typeof data.todoLists === 'object' && Object.keys(data.todoLists).length > 0) {
-          window.workspace.todoLists = data.todoLists;
-        }
-
-        if (data.currentListId && window.workspace.todoLists[data.currentListId]) {
-          window.workspace.currentListId = data.currentListId;
-        } else {
-          window.workspace.currentListId = Object.keys(window.workspace.todoLists)[0] || "main";
-        }
-
-        if (Array.isArray(data.stickyNotes)) {
-          window.workspace.stickyNotes = data.stickyNotes;
-        }
+        applyLoadedData(data);
 
         const savedAt = data.updatedAt ? formatClockTime(new Date(data.updatedAt)) : formatClockTime(new Date());
         updateSyncBadge('saved', `restored ✓ last saved ${savedAt}`);
@@ -1231,6 +1517,246 @@
         return false;
       }
     }
+
+    // ==========================================
+    // CLOUD ACCOUNT SYNC (bring-your-own Firebase project)
+    // ==========================================
+
+    async function ensureFirebaseLoaded() {
+      if (fb) return fb;
+      const [appMod, authMod, storeMod] = await Promise.all([
+        import('https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js'),
+        import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js'),
+        import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js'),
+      ]);
+      fb = {
+        initializeApp: appMod.initializeApp,
+        getAuth: authMod.getAuth,
+        GoogleAuthProvider: authMod.GoogleAuthProvider,
+        signInWithPopup: authMod.signInWithPopup,
+        onAuthStateChanged: authMod.onAuthStateChanged,
+        signOut: authMod.signOut,
+        getFirestore: storeMod.getFirestore,
+        doc: storeMod.doc,
+        setDoc: storeMod.setDoc,
+        getDoc: storeMod.getDoc,
+        onSnapshot: storeMod.onSnapshot,
+      };
+      return fb;
+    }
+
+    function cloudDocRef() {
+      return fb.doc(cloudDbObj, 'users', cloudUser.uid, 'data', 'workspace');
+    }
+
+    function attachCloudListener() {
+      if (cloudUnsub) cloudUnsub();
+      cloudUnsub = fb.onSnapshot(cloudDocRef(), (snap) => {
+        if (snap.exists()) {
+          applyLoadedData(snap.data());
+          rerenderAll();
+          updateSyncBadge('saved', `synced ✓ ${formatClockTime(new Date())}`);
+        }
+      }, (err) => {
+        console.error('Cloud listen error:', err);
+        updateSyncBadge('error', '⚠ cloud sync interrupted');
+      });
+    }
+
+    function setBackendUI(mode, email) {
+      document.getElementById('storage-opt-local').classList.toggle('active', mode === 'local');
+      document.getElementById('storage-opt-cloud').classList.toggle('active', mode === 'cloud');
+      document.getElementById('storage-btn-label').innerText = mode === 'cloud' ? 'cloud account' : 'this browser';
+
+      const isConnected = mode === 'cloud' && !!email;
+      document.getElementById('cloud-setup-connected').style.display = isConnected ? 'block' : 'none';
+      document.getElementById('cloud-setup-disconnected').style.display = isConnected ? 'none' : 'block';
+      if (email) document.getElementById('cloud-account-email').innerText = email;
+    }
+
+    async function connectCloud(configText) {
+      const errEl = document.getElementById('cloud-setup-error');
+      errEl.classList.remove('show');
+      errEl.innerText = '';
+
+      let config;
+      try {
+        config = JSON.parse(configText);
+        if (!config.apiKey || !config.projectId) throw new Error('missing apiKey/projectId');
+      } catch (err) {
+        errEl.innerText = 'that does not look like a valid Firebase config — paste the full object from your Firebase console.';
+        errEl.classList.add('show');
+        return;
+      }
+
+      updateSyncBadge('saving', 'connecting to cloud…');
+      try {
+        await ensureFirebaseLoaded();
+        const app = fb.initializeApp(config, 'oled-workspace-' + Date.now());
+        cloudAuthObj = fb.getAuth(app);
+        cloudDbObj = fb.getFirestore(app);
+
+        const result = await fb.signInWithPopup(cloudAuthObj, new fb.GoogleAuthProvider());
+        cloudUser = result.user;
+
+        localStorage.setItem(FIREBASE_CONFIG_KEY, configText);
+        localStorage.setItem(BACKEND_KEY, 'cloud');
+        activeBackend = 'cloud';
+
+        // If this account already has data saved, use it. Otherwise seed the
+        // cloud with whatever is currently on this device.
+        const existing = await fb.getDoc(cloudDocRef());
+        if (existing.exists()) {
+          applyLoadedData(existing.data());
+          rerenderAll();
+        } else {
+          await window.persistWorkspace(true);
+        }
+
+        attachCloudListener();
+        setBackendUI('cloud', cloudUser.email);
+        document.getElementById('cloud-setup').classList.add('open');
+        updateSyncBadge('saved', `synced ✓ ${formatClockTime(new Date())}`);
+        window.showToast('cloud account connected');
+      } catch (err) {
+        console.error('Cloud connect error:', err);
+        let msg = 'could not connect — check your config and try again.';
+        if (err && err.code === 'auth/unauthorized-domain') {
+          msg = `add "${location.hostname}" under Authentication → Settings → Authorized domains in your Firebase project, then try again.`;
+        } else if (err && err.code === 'auth/popup-closed-by-user') {
+          msg = 'sign-in popup was closed before finishing.';
+        }
+        errEl.innerText = msg;
+        errEl.classList.add('show');
+        activeBackend = 'local';
+        updateSyncBadge('error', '⚠ cloud connect failed — using this browser');
+      }
+    }
+
+    async function silentlyReconnectCloud() {
+      let savedConfigText;
+      try { savedConfigText = localStorage.getItem(FIREBASE_CONFIG_KEY); } catch (err) { savedConfigText = null; }
+      if (!savedConfigText) return false;
+
+      try {
+        const config = JSON.parse(savedConfigText);
+        await ensureFirebaseLoaded();
+        const app = fb.initializeApp(config, 'oled-workspace-' + Date.now());
+        cloudAuthObj = fb.getAuth(app);
+        cloudDbObj = fb.getFirestore(app);
+
+        const user = await new Promise((resolve) => {
+          const unsub = fb.onAuthStateChanged(cloudAuthObj, (u) => { unsub(); resolve(u); });
+        });
+        if (!user) return false;
+
+        cloudUser = user;
+        activeBackend = 'cloud';
+
+        const existing = await fb.getDoc(cloudDocRef());
+        if (existing.exists()) applyLoadedData(existing.data());
+
+        attachCloudListener();
+        setBackendUI('cloud', cloudUser.email);
+        updateSyncBadge('saved', `synced ✓ ${formatClockTime(new Date())}`);
+        return true;
+      } catch (err) {
+        console.error('Cloud reconnect error:', err);
+        return false;
+      }
+    }
+
+    function disconnectCloud() {
+      if (cloudUnsub) { cloudUnsub(); cloudUnsub = null; }
+      if (cloudAuthObj && fb) {
+        fb.signOut(cloudAuthObj).catch(() => {});
+      }
+      cloudUser = null;
+      activeBackend = 'local';
+      try { localStorage.setItem(BACKEND_KEY, 'local'); } catch (err) {}
+      setBackendUI('local');
+      loadLocalWorkspace();
+      rerenderAll();
+      window.showToast('switched back to this browser');
+    }
+
+    // Storage menu (top-left, next to the app name)
+    const storageMenuBtn = document.getElementById('storage-menu-btn');
+    const storagePanel = document.getElementById('storage-panel');
+
+    storageMenuBtn.onclick = (e) => {
+      e.stopPropagation();
+      storagePanel.classList.toggle('open');
+      storageMenuBtn.classList.toggle('open');
+    };
+
+    storagePanel.onclick = (e) => e.stopPropagation();
+
+    document.addEventListener('click', () => {
+      storagePanel.classList.remove('open');
+      storageMenuBtn.classList.remove('open');
+    });
+
+    document.getElementById('storage-opt-cloud').onclick = () => {
+      document.getElementById('cloud-setup').classList.toggle('open');
+    };
+
+    document.getElementById('storage-opt-local').onclick = () => {
+      document.getElementById('cloud-setup').classList.remove('open');
+      if (activeBackend === 'cloud') disconnectCloud();
+    };
+
+    document.getElementById('cloud-connect-btn').onclick = () => {
+      const text = document.getElementById('firebase-config-input').value.trim();
+      connectCloud(text);
+    };
+
+    document.getElementById('cloud-signout-btn').onclick = () => disconnectCloud();
+
+    // Backup to / restore from a plain .json file — works with either backend
+    document.getElementById('export-file-btn').onclick = () => {
+      const payload = {
+        todoLists: window.workspace.todoLists,
+        currentListId: window.workspace.currentListId,
+        stickyNotes: window.workspace.stickyNotes,
+        exportedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const stamp = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `true-black-to-do-backup-${stamp}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      window.showToast('backup file downloaded');
+    };
+
+    const importFileInput = document.getElementById('import-file-input');
+    document.getElementById('import-file-btn').onclick = () => importFileInput.click();
+
+    importFileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if (!data || typeof data !== 'object') throw new Error('not an object');
+          applyLoadedData(data);
+          rerenderAll();
+          window.persistWorkspace(true);
+          window.showToast('imported from file');
+        } catch (err) {
+          console.error('Import error:', err);
+          window.showToast('could not read that file — is it a valid backup?');
+        }
+      };
+      reader.readAsText(file);
+      importFileInput.value = '';
+    };
 
     // ==========================================
     // UI NAVIGATION & FOCUS TIMER
@@ -2081,10 +2607,30 @@
       return div.innerHTML;
     }
 
-    // Load saved data, then render, then start listening for changes
-    loadWorkspace();
-    renderSublists();
-    renderTasks();
+    // Load saved data, then render, then (if configured) try to reconnect the cloud backend
+    async function initApp() {
+      activeBackend = getSavedBackend();
+
+      // Always populate from the local cache first so the UI is never blank,
+      // even while a cloud reconnect is still in flight.
+      loadLocalWorkspace();
+      renderSublists();
+      renderTasks();
+
+      if (activeBackend === 'cloud') {
+        const reconnected = await silentlyReconnectCloud();
+        if (!reconnected) {
+          activeBackend = 'local';
+          try { localStorage.setItem(BACKEND_KEY, 'local'); } catch (err) {}
+          setBackendUI('local');
+          updateSyncBadge('error', '⚠ cloud reconnect failed — using this browser');
+        }
+      } else {
+        setBackendUI('local');
+      }
+    }
+
+    initApp();
   </script>
 </body>
 </html>
