@@ -571,6 +571,27 @@
     }
     .chip-del:hover { opacity: 1; }
 
+    .mini-ring {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      transform: rotate(-90deg);
+    }
+
+    .mini-ring-track {
+      fill: none;
+      stroke: var(--border-strong);
+      stroke-width: 3;
+    }
+
+    .mini-ring-progress {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 3;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.4s var(--ease);
+    }
+
     .new-list-input {
       background: transparent;
       border: 1px dashed var(--border-strong);
@@ -584,6 +605,92 @@
     }
 
     .new-list-input:focus { border-color: var(--accent); }
+
+    /* Big Activity-style Progress Ring */
+    .ring-section {
+      display: flex;
+      justify-content: center;
+      padding: 6px 0 2px;
+    }
+
+    .ring-visual {
+      position: relative;
+      width: 172px;
+      height: 172px;
+    }
+
+    .ring-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+      overflow: visible;
+    }
+
+    .ring-track {
+      fill: none;
+      stroke: var(--surface-2);
+      stroke-width: 14;
+    }
+
+    .ring-progress {
+      fill: none;
+      stroke: url(#ringGradient);
+      stroke-width: 14;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.7s var(--ease);
+      filter: drop-shadow(0 0 10px rgba(255,94,26,0.55));
+    }
+
+    .ring-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      text-align: center;
+    }
+
+    .ring-percent {
+      font-size: 2.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .ring-sub {
+      font-size: 0.74rem;
+      color: var(--text-dim);
+    }
+
+    .ring-list-label {
+      font-size: 0.66rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-top: 2px;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Confetti burst on task completion */
+    .confetti-piece {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 2000;
+      pointer-events: none;
+      will-change: transform, opacity;
+      animation: confettiBurst 900ms cubic-bezier(.15,.7,.3,1) forwards;
+    }
+
+    @keyframes confettiBurst {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+      65% { opacity: 1; }
+      100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.4); opacity: 0; }
+    }
 
     /* Task Add Form */
     .task-creator-box {
@@ -1222,6 +1329,27 @@
         <div id="sublists-container" style="display: flex; gap: 8px;"></div>
         <div class="new-list-form">
           <input type="text" id="new-list-input" class="new-list-input" placeholder="+ new list..." autocomplete="off">
+        </div>
+      </div>
+
+      <!-- Big Progress Ring for the active list -->
+      <div class="ring-section">
+        <div class="ring-visual">
+          <svg class="ring-svg" viewBox="0 0 160 160">
+            <defs>
+              <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ff5e1a" />
+                <stop offset="100%" stop-color="#ffd60a" />
+              </linearGradient>
+            </defs>
+            <circle class="ring-track" cx="80" cy="80" r="70" />
+            <circle class="ring-progress" id="ring-progress-circle" cx="80" cy="80" r="70" />
+          </svg>
+          <div class="ring-center">
+            <div class="ring-percent" id="ring-percent">0%</div>
+            <div class="ring-sub" id="ring-sub">no tasks yet</div>
+            <div class="ring-list-label" id="ring-list-label">main</div>
+          </div>
         </div>
       </div>
 
@@ -1967,6 +2095,78 @@
     }
 
     // ==========================================
+    // PROGRESS RINGS & CONFETTI
+    // ==========================================
+    const RING_RADIUS = 70;
+    const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+    const MINI_RING_RADIUS = 7;
+    const MINI_RING_CIRCUMFERENCE = 2 * Math.PI * MINI_RING_RADIUS;
+
+    function computeListStats(listId) {
+      const items = (window.workspace.todoLists && window.workspace.todoLists[listId]) || [];
+      const total = items.length;
+      const done = items.filter(t => t.done).length;
+      return { total, done, pct: total ? Math.round((done / total) * 100) : 0 };
+    }
+
+    function miniRingMarkup(pct) {
+      const offset = MINI_RING_CIRCUMFERENCE * (1 - pct / 100);
+      return `<svg class="mini-ring" viewBox="0 0 18 18">
+        <circle class="mini-ring-track" cx="9" cy="9" r="${MINI_RING_RADIUS}"></circle>
+        <circle class="mini-ring-progress" cx="9" cy="9" r="${MINI_RING_RADIUS}" style="stroke-dasharray:${MINI_RING_CIRCUMFERENCE};stroke-dashoffset:${offset};"></circle>
+      </svg>`;
+    }
+
+    const ringProgressCircle = document.getElementById('ring-progress-circle');
+    const ringPercentEl = document.getElementById('ring-percent');
+    const ringSubEl = document.getElementById('ring-sub');
+    const ringListLabelEl = document.getElementById('ring-list-label');
+    ringProgressCircle.style.strokeDasharray = `${RING_CIRCUMFERENCE}`;
+
+    function renderProgressRing() {
+      const { total, done, pct } = computeListStats(window.workspace.currentListId);
+      const offset = RING_CIRCUMFERENCE * (1 - (total ? done / total : 0));
+      ringProgressCircle.style.strokeDashoffset = `${offset}`;
+      ringPercentEl.innerText = `${pct}%`;
+      ringSubEl.innerText = total ? `${done} of ${total} done` : 'no tasks yet';
+      ringListLabelEl.innerText = window.workspace.currentListId;
+    }
+
+    // Fires a burst of "confetti" from a screen point — used when a task gets checked off
+    function launchConfetti(x, y) {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      const colors = ['#ff5e1a', '#ffd60a', '#30d158', '#0a84ff', '#bf5af2', '#64d2ff'];
+      const pieceCount = 26;
+
+      for (let i = 0; i < pieceCount; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti-piece';
+
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 55 + Math.random() * 95;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance - 50; // bias upward for a "pop" feel
+        const rot = (Math.random() * 720 - 360) + 'deg';
+        const size = 5 + Math.random() * 6;
+
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        el.style.width = size + 'px';
+        el.style.height = (size * (Math.random() > 0.5 ? 1 : 1.7)) + 'px';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        el.style.setProperty('--dx', dx + 'px');
+        el.style.setProperty('--dy', dy + 'px');
+        el.style.setProperty('--rot', rot);
+
+        document.body.appendChild(el);
+        el.addEventListener('animationend', () => el.remove());
+        setTimeout(() => el.remove(), 1200);
+      }
+    }
+
+    // ==========================================
     // SUB-LISTS & TASKS
     // ==========================================
     const sublistsContainer = document.getElementById('sublists-container');
@@ -1989,8 +2189,10 @@
         const chip = document.createElement('div');
         chip.className = 'sublist-chip' + (name === window.workspace.currentListId ? ' active' : '');
         const count = (window.workspace.todoLists[name] || []).filter(t => !t.done).length;
+        const stats = computeListStats(name);
 
         chip.innerHTML = `
+          ${miniRingMarkup(stats.pct)}
           <span class="chip-label">${escapeMarkup(name)} (${count})</span>
           ${name !== 'main' ? `<span class="chip-del" title="Delete list">×</span>` : ''}
         `;
@@ -2045,6 +2247,7 @@
 
     window.renderTasks = function() {
       taskList.innerHTML = '';
+      renderProgressRing();
       const list = window.workspace.todoLists[window.workspace.currentListId] || [];
 
       const sorted = [...list].map((item, originalIdx) => ({ item, originalIdx }));
@@ -2093,7 +2296,7 @@
           </div>
         `;
 
-        li.querySelector('.checkbox').onchange = () => window.toggleTask(originalIdx);
+        li.querySelector('.checkbox').onchange = (e) => window.toggleTask(originalIdx, e.target);
         li.querySelector('.timer-btn-task').onclick = () => window.setFocusTask(item.id, item.text, window.workspace.currentListId);
         li.querySelector('.del-task-btn').onclick = () => window.removeTask(originalIdx);
 
@@ -2101,12 +2304,13 @@
       });
     };
 
-    window.toggleTask = function(index) {
+    window.toggleTask = function(index, checkboxEl) {
       const items = window.workspace.todoLists[window.workspace.currentListId];
       if (!items || !items[index]) return;
       const task = items[index];
+      const completingNow = !task.done;
 
-      if (!task.done && task.repeat && task.repeat !== 'none') {
+      if (completingNow && task.repeat && task.repeat !== 'none') {
         let baseDate = task.dueDate ? new Date(task.dueDate) : new Date();
         const now = new Date();
 
@@ -2132,6 +2336,11 @@
         window.showToast(`recurring ${task.repeat}: advanced to ${baseDate.toLocaleDateString()} (cycle ${task.streak})`);
       } else {
         task.done = !task.done;
+      }
+
+      if (completingNow && checkboxEl) {
+        const rect = checkboxEl.getBoundingClientRect();
+        launchConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
       }
 
       renderTasks();
